@@ -5,6 +5,58 @@ use axum::response::{IntoResponse, Response};
 use axum::http::{self, StatusCode};
 use maud::{html, Markup, Render, Escaper, DOCTYPE};
 
+#[derive(Debug)]
+pub enum ErrorResponse {
+    Internal,
+    PostNotFound,
+    StaticResourceNotFound,
+    RouteNotFound,
+}
+
+impl ErrorResponse {
+    fn status_code(&self) -> StatusCode {
+        match self {
+            ErrorResponse::Internal => StatusCode::INTERNAL_SERVER_ERROR,
+            ErrorResponse::PostNotFound => StatusCode::NOT_FOUND,
+            ErrorResponse::StaticResourceNotFound => StatusCode::NOT_FOUND,
+            ErrorResponse::RouteNotFound => StatusCode::NOT_FOUND,
+        }
+    }
+}
+
+impl IntoResponse for ErrorResponse {
+    fn into_response(self) -> Response {
+        let status_code = self.status_code();
+        
+        // Create a string buffer containing the full error text, e.g. "404 Not Found".
+        let status_text = {
+            let status_code_str = status_code.as_str();
+            let reason = status_code.canonical_reason();
+
+            // Allocate a buffer with enough capacity to store the full error text.
+            let mut buf = String::with_capacity(
+                status_code_str.len() + reason.map(|reason| reason.len() + 1).unwrap_or(0));
+            
+            // Push the numerical code string first, then a space, then the error reason string.
+            buf.push_str(status_code_str);
+            if let Some(reason) = reason {
+                buf.push(' ');
+                buf.push_str(reason);
+            }
+
+            buf
+        };
+
+        HtmlResponse::new()
+            .with_status(status_code)
+            .with_body(html! {
+                p { (status_text) }
+            })
+            .with_title_owned(status_text)
+            .into_response()
+    }
+}
+
 pub struct HtmlResponse {
     status: StatusCode,
     title: Cow<'static, str>,

@@ -1,32 +1,17 @@
 mod codeblock;
 mod fs_watcher;
-mod handlers;
-mod html_response;
 mod post;
 mod posts_store;
 mod render;
+mod services;
 
-use std::{env, fs, io, path::PathBuf, thread};
+use std::{env, fs, path::PathBuf, thread};
 
-use axum::{
-    {routing::{get, get_service}, Router},
-    extract::{Extension, Path},
-    response::{IntoResponse, Response},
-    handler::Handler,
-    http::StatusCode
-};
-use libshire::convert::infallible_elim;
-use maud::html;
+use axum::Server;
 use miette::{IntoDiagnostic, Context};
-use tower::{
-    limit::ConcurrencyLimitLayer,
-    ServiceExt,
-};
-use tower_http::{services::ServeDir, trace::TraceLayer};
 use tracing::info;
 
 use codeblock::CodeBlockRenderer;
-use html_response::HtmlResponse;
 use posts_store::ConcurrentPostsStore;
 use render::Renderer;
 
@@ -94,20 +79,11 @@ fn main() -> miette::Result<()> {
 }
 
 async fn run(config: Config, posts_store: ConcurrentPostsStore) -> miette::Result<()> {
-    let static_service = get_service(ServeDir::new(&config.static_dir)
-            .fallback(handle_fallback
-                .into_service()
-                .map_err(infallible_elim::<io::Error>)))
-        .handle_error(handle_static_io_error);
-
-    let router = Router::new()
-        .route("/", get(handle_index))
-        .route("/posts/:post_id", get(handle_post_page))
-        .nest("/static", static_service)
-        .fallback(handle_fallback.into_service())
-        .layer(ConcurrencyLimitLayer::new(config.concurrency_limit))
-        .layer(TraceLayer::new_for_http())
-        .layer(Extension(posts_store));
+    let service = services::site_service(
+        posts_store,
+        &config.static_dir,
+        config.concurrency_limit
+    );
 
     let bind_address = &config.bind
         .parse()
@@ -116,106 +92,11 @@ async fn run(config: Config, posts_store: ConcurrentPostsStore) -> miette::Resul
 
     info!(address = %bind_address, "Starting server");
 
-    axum::Server::try_bind(bind_address)
+    Server::try_bind(bind_address)
         .into_diagnostic()
         .wrap_err_with(|| format!("Failed to bind {}", bind_address))?
-        .serve(router.into_make_service())
+        .serve(service.into_make_service())
         .await
         .into_diagnostic()
         .wrap_err("Fatal error while running the server")
-}
-
-async fn handle_fallback() -> Error {
-    Error::NotFound
-}
-
-async fn handle_static_io_error(_err: io::Error) -> Error {
-    Error::Internal
-}
-
-async fn handle_index(Extension(posts): Extension<ConcurrentPostsStore>) -> HtmlResponse {
-    HtmlResponse::new()
-        .with_title_static("Placeholder title")
-        .with_crawler_permissive()
-        .with_body(html! {
-            h1 { "Here is my great heading" }
-            p { "Hello world" }
-            ul {
-                @for post in posts.read().await.iter_by_created().rev() {
-                    li {
-                        a href={ "/posts/" (post.id_str()) } {
-                            (post.title())
-                        };
-                    }
-                }
-            }
-        })
-}
-
-async fn handle_post_page(
-    Path(post_id): Path<String>,
-    Extension(posts): Extension<ConcurrentPostsStore>
-) -> Result<HtmlResponse, Error>
-{
-    let post = posts.get(&post_id)
-        .await
-        .ok_or(Error::NotFound)?;
-
-    Ok(HtmlResponse::new()
-        .with_crawler_permissive()
-        .with_title_owned(post.title().to_owned())
-        .with_head(html! {
-            link href="/static/style/code.css" rel="stylesheet";
-        })
-        .with_body(html! {
-            h1 { (post.title()) }
-            p { "by " (post.author()) }
-            article {
-                (post.html())
-            }
-        }))
-}
-
-// TODO: store diagnostic information in Error struct which is output to trace
-#[derive(Debug)]
-enum Error {
-    Internal,
-    NotFound,
-}
-
-impl Error {
-    fn status_code(&self) -> StatusCode {
-        match self {
-            Error::Internal => StatusCode::INTERNAL_SERVER_ERROR,
-            Error::NotFound => StatusCode::NOT_FOUND,
-        }
-    }
-}
-
-impl IntoResponse for Error {
-    fn into_response(self) -> Response {
-        let status_code = self.status_code();
-        
-        // Create a string buffer containing the full error text, e.g. "404 Not Found".
-        let status_text = {
-            let status_code_str = status_code.as_str();
-            let reason = status_code.canonical_reason();
-            let mut buf = String::with_capacity(
-                status_code_str.len() + reason.map(|reason| reason.len() + 1).unwrap_or(0));
-            buf.push_str(status_code_str);
-            if let Some(reason) = reason {
-                buf.push(' ');
-                buf.push_str(reason);
-            }
-            buf
-        };
-
-        HtmlResponse::new()
-            .with_status(status_code)
-            .with_body(html! {
-                p { (status_text) }
-            })
-            .with_title_owned(status_text)
-            .into_response()
-    }
 }
