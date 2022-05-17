@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+    "blog_server",
+    "utils/css_gen"
+]

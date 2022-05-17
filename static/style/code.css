@@ -1,0 +1,344 @@
+.cb_code {
+    color: #323232;
+    background-color: #ffffff;
+}
+
+.cb_comment {
+    color: #969896;
+    font-style: italic;
+}
+
+.cb_string {
+    color: #183691;
+}
+
+.cb_regexp-operator {
+    color: #a71d5d;
+}
+
+.cb_string.cb_regexp.cb_characterclass .cb_punctuation.cb_definition.cb_string.cb_begin,
+.cb_string.cb_regexp.cb_characterclass .cb_punctuation.cb_definition.cb_string.cb_end {
+    color: #a71d5d;
+}
+
+.cb_constant.cb_numeric {
+    color: #0086b3;
+}
+
+.cb_constant.cb_language {
+    color: #0086b3;
+}
+
+.cb_constant.cb_character,
+.cb_constant.cb_other,
+.cb_variable.cb_other.cb_constant {
+    color: #0086b3;
+}
+
+.cb_variable {
+    color: #323232;
+}
+
+.cb_keyword {
+    color: #a71d5d;
+    font-weight: bold;
+}
+
+.cb_bitwise-operator {
+    color: #a71d5d;
+    font-weight: bold;
+}
+
+.cb_storage {
+    color: #a71d5d;
+    font-weight: bold;
+}
+
+.cb_storage.cb_type {
+    color: #a71d5d;
+    font-weight: bold;
+}
+
+.cb_entity.cb_name.cb_class {
+    color: #0086b3;
+}
+
+.cb_entity.cb_other.cb_inherited-class {
+    color: #0086b3;
+}
+
+.cb_entity.cb_name.cb_function {
+    color: #795da3;
+    font-weight: bold;
+}
+
+.cb_variable.cb_parameter {
+    color: #323232;
+}
+
+.cb_entity.cb_name.cb_tag {
+    color: #63a35c;
+}
+
+.cb_entity.cb_other.cb_attribute-name {
+    color: #795da3;
+}
+
+.cb_support.cb_function {
+    color: #62a35c;
+}
+
+.cb_support.cb_constant {
+    color: #0086b3;
+}
+
+.cb_support.cb_type,
+.cb_support.cb_class {
+    color: #0086b3;
+}
+
+.cb_support.cb_other.cb_variable {
+    color: #323232;
+}
+
+.cb_invalid,
+.cb_invalid.cb_illegal,
+.cb_invalid.cb_deprecated {
+    color: #b52a1d;
+    background-color: #f5f5f5;
+    font-weight: bold;
+}
+
+.cb_entity.cb_name.cb_filename.cb_find-in-files {
+    color: #323232;
+    font-weight: bold;
+}
+
+.cb_constant.cb_numeric.cb_line-number.cb_find-in-files,
+.cb_constant.cb_numeric.cb_line-number.cb_match.cb_find-in-files {
+    color: #b3b3b3;
+}
+
+.cb_meta.cb_diff.cb_header {
+    color: #969896;
+    background-color: #ffffff;
+    font-style: italic;
+}
+
+.cb_meta.cb_diff.cb_header .cb_punctuation.cb_definition.cb_from-file.cb_diff {
+    color: #bd2c00;
+    background-color: #ffecec;
+    font-weight: bold;
+    font-style: italic;
+}
+
+.cb_meta.cb_diff.cb_header .cb_punctuation.cb_definition.cb_to-file.cb_diff {
+    color: #55a532;
+    background-color: #eaffea;
+    font-weight: bold;
+    font-style: italic;
+}
+
+.cb_meta.cb_diff.cb_range {
+    color: #969896;
+    font-weight: bold;
+    font-style: italic;
+}
+
+.cb_markup.cb_deleted {
+    background-color: #ffecec;
+}
+
+.cb_markup.cb_deleted .cb_punctuation.cb_definition.cb_inserted {
+    color: #bd2c00;
+    font-weight: bold;
+}
+
+.cb_markup.cb_inserted {
+    background-color: #eaffea;
+}
+
+.cb_markup.cb_inserted .cb_punctuation.cb_definition.cb_inserted {
+    color: #55a532;
+    font-weight: bold;
+}
+
+.cb_markup.cb_deleted.cb_git_gutter {
+    color: #bd2c00;
+}
+
+.cb_markup.cb_inserted.cb_git_gutter {
+    color: #55a532;
+}
+
+.cb_markup.cb_changed.cb_git_gutter {
+    color: #0086b3;
+}
+
+.cb_markup.cb_ignored.cb_git_gutter {
+    color: #b3b3b3;
+}
+
+.cb_markup.cb_untracked.cb_git_gutter {
+    color: #b3b3b3;
+}
+
+.cb_source.cb_css .cb_punctuation.cb_definition.cb_entity {
+    color: #323232;
+}
+
+.cb_source.cb_css .cb_entity.cb_other.cb_attribute-name.cb_pseudo-class,
+.cb_source.cb_css .cb_entity.cb_other.cb_attribute-name.cb_pseudo-element {
+    color: #a71d5d;
+}
+
+.cb_source.cb_css .cb_meta.cb_value,
+.cb_source.cb_css .cb_support.cb_constant,
+.cb_source.cb_css .cb_support.cb_function {
+    color: #323232;
+}
+
+.cb_source.cb_css .cb_constant.cb_other.cb_color {
+    color: #ed6a43;
+}
+
+.cb_source.cb_scss .cb_punctuation.cb_definition.cb_entity {
+    color: #323232;
+}
+
+.cb_source.cb_scss .cb_entity.cb_other.cb_attribute-name.cb_pseudo-class,
+.cb_source.cb_scss .cb_entity.cb_other.cb_attribute-name.cb_pseudo-element {
+    color: #a71d5d;
+}
+
+.cb_source.cb_scss .cb_support.cb_constant.cb_property-value,
+.cb_source.cb_scss .cb_support.cb_function {
+    color: #323232;
+}
+
+.cb_source.cb_scss .cb_variable {
+    color: #a71d5d;
+}
+
+.cb_variable.cb_language.cb_this.cb_js {
+    color: #ed6a43;
+}
+
+.cb_source.cb_js .cb_entity.cb_name.cb_function {
+    color: #323232;
+}
+
+.cb_source.cb_js .cb_meta.cb_function .cb_entity.cb_name.cb_function,
+.cb_source.cb_js .cb_entity.cb_name.cb_function .cb_meta.cb_function {
+    color: #795da3;
+    font-weight: bold;
+}
+
+.cb_entity.cb_name.cb_type.cb_new.cb_js {
+    color: #795da3;
+}
+
+.cb_variable.cb_language.cb_prototype.cb_js {
+    color: #0086b3;
+}
+
+.cb_source.cb_js .cb_support.cb_function {
+    color: #0086b3;
+}
+
+.cb_support.cb_type.cb_object.cb_console.cb_js {
+    color: #795da3;
+}
+
+.cb_source.cb_python .cb_keyword {
+    font-weight: bold;
+}
+
+.cb_source.cb_python .cb_storage {
+    font-weight: bold;
+}
+
+.cb_source.cb_python .cb_storage.cb_type {
+    font-weight: bold;
+}
+
+.cb_source.cb_python .cb_entity.cb_name.cb_function {
+    color: #323232;
+    font-weight: bold;
+}
+
+.cb_source.cb_php .cb_entity.cb_name.cb_type.cb_class {
+    color: #323232;
+    font-weight: bold;
+}
+
+.cb_variable.cb_language.cb_ruby {
+    color: #ed6a43;
+}
+
+.cb_entity.cb_name.cb_type.cb_module.cb_ruby {
+    color: #795da3;
+    font-weight: bold;
+}
+
+.cb_entity.cb_name.cb_type.cb_class.cb_ruby {
+    color: #795da3;
+    font-weight: bold;
+}
+
+.cb_entity.cb_other.cb_inherited-class.cb_ruby {
+    color: #795da3;
+    font-weight: bold;
+}
+
+.cb_text.cb_html.cb_markdown .cb_punctuation.cb_definition {
+    color: #a71d5d;
+}
+
+.cb_text.cb_html.cb_markdown .cb_meta.cb_separator {
+    color: #b3b3b3;
+}
+
+.cb_text.cb_html.cb_markdown .cb_markup.cb_heading {
+    font-weight: bold;
+}
+
+.cb_text.cb_html.cb_markdown .cb_markup.cb_raw.cb_block {
+    color: #323232;
+}
+
+.cb_text.cb_html.cb_markdown .cb_markup.cb_raw.cb_inline {
+    color: #323232;
+}
+
+.cb_text.cb_html.cb_markdown .cb_meta.cb_link,
+.cb_text.cb_html.cb_markdown .cb_meta.cb_image {
+    color: #4183c4;
+}
+
+.cb_text.cb_html.cb_markdown .cb_markup.cb_underline.cb_link,
+.cb_text.cb_html.cb_markdown .cb_constant.cb_other.cb_reference {
+    font-style: italic;
+}
+
+.cb_text.cb_html.cb_markdown .cb_markup.cb_list {
+    color: #ed6a43;
+}
+
+.cb_text.cb_html.cb_markdown .cb_markup.cb_bold {
+    font-weight: bold;
+}
+
+.cb_text.cb_html.cb_markdown .cb_markup.cb_italic {
+    font-style: italic;
+}
+
+.cb_text.cb_html.cb_markdown .cb_markup.cb_bold .cb_markup.cb_italic {
+    font-weight: bold;
+    font-style: italic;
+}
+
+.cb_text.cb_html.cb_markdown .cb_markup.cb_italic .cb_markup.cb_bold {
+    font-weight: bold;
+    font-style: italic;
+}
