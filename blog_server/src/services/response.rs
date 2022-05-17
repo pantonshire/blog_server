@@ -1,8 +1,12 @@
-use std::borrow::Cow;
-use std::fmt::{self, Write};
+use std::{
+    borrow::Cow,
+    fmt::{self, Write},
+};
 
-use axum::response::{IntoResponse, Response};
-use axum::http::{self, StatusCode};
+use axum::{
+    http::StatusCode,
+    response::{IntoResponse, Html, Response},
+};
 use maud::{html, Markup, Render, Escaper, DOCTYPE};
 
 #[derive(Debug)]
@@ -140,13 +144,8 @@ impl IntoResponse for HtmlResponse {
             }
         };
 
-        let mut response = (self.status, html_doc.into_string())
-            .into_response();
-
-        response.headers_mut()
-            .append("Content-Type", http::HeaderValue::from_static("text/html; charset=utf-8"));
-
-        response
+        (self.status, Html(html_doc.into_string()))
+            .into_response()
     }
 }
 
