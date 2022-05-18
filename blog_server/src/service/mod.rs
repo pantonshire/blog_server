@@ -1,5 +1,6 @@
 mod index;
-mod posts;
+mod post;
+mod posts_list;
 mod response;
 mod site;
 mod static_content;

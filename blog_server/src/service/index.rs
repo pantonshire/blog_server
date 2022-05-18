@@ -9,7 +9,7 @@ use super::response::HtmlResponse;
 
 pub async fn handle(Extension(posts): Extension<ConcurrentPostsStore>) -> HtmlResponse {
     HtmlResponse::new()
-        .with_title_static("Placeholder title")
+        .with_title_static("Pantonshire")
         .with_crawler_permissive()
         .with_head(html! {
             link href="/static/styles/main.css" rel="stylesheet";
@@ -26,7 +26,7 @@ pub async fn handle(Extension(posts): Extension<ConcurrentPostsStore>) -> HtmlRe
                              egg-shaped body and a smiling face, and is doing a little dance next \
                              to a Raspberry Pi."
                         width="256";
-                    figcaption {
+                    figcaption .quiet {
                         "Drawn by "
                         a href="https://twitter.com/smolrobots" { "@smolrobots" }
                     }
@@ -41,11 +41,14 @@ pub async fn handle(Extension(posts): Extension<ConcurrentPostsStore>) -> HtmlRe
             section .content_section {
                 h2 { "Articles" }
                 ul {
-                    @for post in posts.read().await.iter_by_created().rev() {
+                    @for post in posts.read().await.iter_by_created().rev().take(5) {
                         li {
                             a href={"/articles/" (post.id_str())} { (post.title()) }
                         }
                     }
+                }
+                p {
+                    a href="/articles" { "See all" }
                 }
             }
         }))

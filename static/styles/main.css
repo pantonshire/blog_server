@@ -146,7 +146,19 @@ body {
     margin-bottom: 2rem;
 }
 
+.quiet {
+    color: #898989;
+}
+
+h1 {
+    font-size: 2rem;
+}
+
 h2 {
+    font-size: 1.75rem;
+}
+
+h1, h2 {
     margin-top: 0.5rem;
     margin-bottom: 0.5rem;
 }
@@ -161,11 +173,19 @@ figure {
 figcaption {
     text-align: center;
     font-size: 0.9rem;
-    color: #898989;
 }
 
 figcaption a {
     color: inherit;
+}
+
+ul {
+    list-style-type: circle;
+}
+
+li {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
 }
 
 /* 
