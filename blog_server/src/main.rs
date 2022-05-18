@@ -3,7 +3,8 @@ mod fs_watcher;
 mod post;
 mod posts_store;
 mod render;
-mod services;
+mod service;
+mod template;
 
 use std::{env, fs, path::PathBuf, thread};
 
@@ -79,7 +80,7 @@ fn main() -> miette::Result<()> {
 }
 
 async fn run(config: Config, posts_store: ConcurrentPostsStore) -> miette::Result<()> {
-    let service = services::site_service(
+    let service = service::site_service(
         posts_store,
         &config.static_dir,
         config.concurrency_limit

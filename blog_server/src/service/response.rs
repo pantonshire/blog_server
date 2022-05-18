@@ -131,6 +131,7 @@ impl IntoResponse for HtmlResponse {
                 head {
                     meta charset="utf-8";
                     meta name="robots" content=(self.crawler_hints);
+                    meta name="viewport" content="width=device-width, initial-scale=1";
                     title { (self.title) }
                     @if let Some(head) = self.head {
                         (head)
