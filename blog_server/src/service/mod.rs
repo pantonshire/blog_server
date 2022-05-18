@@ -1,3 +1,4 @@
+mod contact;
 mod index;
 mod post;
 mod posts_list;
