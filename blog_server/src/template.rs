@@ -9,11 +9,11 @@ pub fn main_page(content: Markup) -> Markup {
                 }
                 #right_nav_box {
                     ul {
-                        li { a href="/" { "Articles" } }
-                        li { a href="/" { "Atom" } }
-                        li { a href="/" { "RSS" } }
-                        li { a href="/" { "GitHub" } }
-                        li { a href="/" { "Contact" } }
+                        li { a href="/articles" { "Articles" } }
+                        li { a href="/atom.xml" { "Atom" } }
+                        li { a href="/rss.xml" { "RSS" } }
+                        li { a href="https://github.com/pantonshire" { "GitHub" } }
+                        li { a href="/contact" { "Contact" } }
                     }
                 }
             }

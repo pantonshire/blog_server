@@ -17,7 +17,7 @@ pub async fn handle(
         .with_crawler_permissive()
         .with_title_owned(post.title().to_owned())
         .with_head(html! {
-            link href="/static/style/code.css" rel="stylesheet";
+            link href="/static/styles/code.css" rel="stylesheet";
         })
         .with_body(html! {
             h1 { (post.title()) }

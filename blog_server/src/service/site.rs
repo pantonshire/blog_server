@@ -27,7 +27,7 @@ pub fn service(
 {
     Router::new()
         .route("/", get(index::handle))
-        .route("/posts/:post_id", get(posts::handle))
+        .route("/articles/:post_id", get(posts::handle))
         .nest("/static", static_content::service(static_dir))
         .fallback(handle_fallback.into_service())
         .layer(ConcurrencyLimitLayer::new(concurrency_limit))
