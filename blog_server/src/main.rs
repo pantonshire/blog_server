@@ -16,16 +16,32 @@ use codeblock::CodeBlockRenderer;
 use posts_store::ConcurrentPostsStore;
 use render::Renderer;
 
-#[derive(knuffel::Decode)]
-struct Config {
+#[derive(knuffel::Decode, Clone, Debug)]
+pub struct Config {
     #[knuffel(child, unwrap(argument))]
     bind: String,
+    #[knuffel(child, unwrap(argument))]
+    concurrency_limit: usize,
     #[knuffel(child, unwrap(argument))]
     posts_dir: PathBuf,
     #[knuffel(child, unwrap(argument))]
     static_dir: PathBuf,
+    #[knuffel(child)]
+    rss: RssConfig,
+}
+
+#[derive(knuffel::Decode, Clone, Debug)]
+pub struct RssConfig {
     #[knuffel(child, unwrap(argument))]
-    concurrency_limit: usize,
+    num_posts: usize,
+    #[knuffel(child, unwrap(argument))]
+    title: String,
+    #[knuffel(child, unwrap(argument))]
+    ttl: u32,
+    #[knuffel(child, unwrap(argument))]
+    protocol: String,
+    #[knuffel(child, unwrap(argument))]
+    domain: String,
 }
 
 fn main() -> miette::Result<()> {
@@ -79,17 +95,17 @@ fn main() -> miette::Result<()> {
         .block_on(run(config, posts_store))
 }
 
-async fn run(config: Config, posts_store: ConcurrentPostsStore) -> miette::Result<()> {
-    let service = service::site_service(
-        posts_store,
-        &config.static_dir,
-        config.concurrency_limit
-    );
-
+async fn run(
+    config: Config,
+    posts_store: ConcurrentPostsStore,
+) -> miette::Result<()>
+{
     let bind_address = &config.bind
         .parse()
         .into_diagnostic()
         .wrap_err_with(|| format!("Failed to parse socket address \"{}\"", config.bind))?;
+
+    let service = service::site_service(config, posts_store);
 
     info!(address = %bind_address, "Starting server");
 

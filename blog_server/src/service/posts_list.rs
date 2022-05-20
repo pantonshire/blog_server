@@ -5,10 +5,10 @@ use crate::{
     posts_store::ConcurrentPostsStore,
     template,
 };
-use super::response::HtmlResponse;
+use super::response::Html;
 
-pub async fn handle(Extension(posts): Extension<ConcurrentPostsStore>) -> HtmlResponse {
-    HtmlResponse::new()
+pub async fn handle(Extension(posts): Extension<ConcurrentPostsStore>) -> Html {
+    Html::new()
         .with_title_static("Articles")
         .with_crawler_permissive()
         .with_head(html! {

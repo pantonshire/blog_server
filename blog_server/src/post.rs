@@ -114,7 +114,7 @@ impl Post {
     pub fn updated(&self) -> DateTime<Utc> {
         self.updated
     }
-
+    
     pub fn parse(
         code_renderer: &CodeBlockRenderer,
         post_id: PostId,
@@ -125,12 +125,12 @@ impl Post {
     ) -> Result<Self, ParseError>
     {
         let mdpost = MdPost::parse(file_name, source)?;
-        Ok(Self::from_mdpost(post_id, code_renderer, created, updated, mdpost))
+        Ok(Self::from_mdpost(code_renderer, post_id, created, updated, mdpost))
     }
 
     fn from_mdpost(
-        id: PostId,
         code_renderer: &CodeBlockRenderer,
+        id: PostId,
         created: DateTime<Utc>,
         updated: DateTime<Utc>,
         mdpost: MdPost,

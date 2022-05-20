@@ -2,18 +2,18 @@ use axum::extract::{Extension, Path};
 use maud::html;
 
 use crate::posts_store::ConcurrentPostsStore;
-use super::response::{ErrorResponse, HtmlResponse};
+use super::response::{Error, Html};
 
 pub async fn handle(
     Path(post_id): Path<String>,
     Extension(posts): Extension<ConcurrentPostsStore>
-) -> Result<HtmlResponse, ErrorResponse>
+) -> Result<Html, Error>
 {
     let post = posts.get(&post_id)
         .await
-        .ok_or(ErrorResponse::PostNotFound)?;
+        .ok_or(Error::PostNotFound)?;
 
-    Ok(HtmlResponse::new()
+    Ok(Html::new()
         .with_crawler_permissive()
         .with_title_owned(post.title().to_owned())
         .with_head(html! {

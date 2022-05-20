@@ -4,31 +4,32 @@ use std::{
 };
 
 use axum::{
-    http::StatusCode,
-    response::{IntoResponse, Html, Response},
+    body::{Bytes, Full},
+    http::{header::{self, HeaderValue}, StatusCode},
+    response::{IntoResponse, Response},
 };
 use maud::{html, Markup, Render, Escaper, DOCTYPE};
 
 #[derive(Debug)]
-pub enum ErrorResponse {
+pub enum Error {
     Internal,
     PostNotFound,
     StaticResourceNotFound,
     RouteNotFound,
 }
 
-impl ErrorResponse {
+impl Error {
     fn status_code(&self) -> StatusCode {
         match self {
-            ErrorResponse::Internal => StatusCode::INTERNAL_SERVER_ERROR,
-            ErrorResponse::PostNotFound => StatusCode::NOT_FOUND,
-            ErrorResponse::StaticResourceNotFound => StatusCode::NOT_FOUND,
-            ErrorResponse::RouteNotFound => StatusCode::NOT_FOUND,
+            Error::Internal => StatusCode::INTERNAL_SERVER_ERROR,
+            Error::PostNotFound => StatusCode::NOT_FOUND,
+            Error::StaticResourceNotFound => StatusCode::NOT_FOUND,
+            Error::RouteNotFound => StatusCode::NOT_FOUND,
         }
     }
 }
 
-impl IntoResponse for ErrorResponse {
+impl IntoResponse for Error {
     fn into_response(self) -> Response {
         let status_code = self.status_code();
         
@@ -51,7 +52,7 @@ impl IntoResponse for ErrorResponse {
             buf
         };
 
-        HtmlResponse::new()
+        Html::new()
             .with_status(status_code)
             .with_body(html! {
                 p { (status_text) }
@@ -61,7 +62,7 @@ impl IntoResponse for ErrorResponse {
     }
 }
 
-pub struct HtmlResponse {
+pub struct Html {
     status: StatusCode,
     title: Cow<'static, str>,
     head: Option<Markup>,
@@ -69,7 +70,7 @@ pub struct HtmlResponse {
     crawler_hints: CrawlerHints,
 }
 
-impl HtmlResponse {
+impl Html {
     pub fn new() -> Self {
         Self {
             status: StatusCode::OK,
@@ -117,13 +118,13 @@ impl HtmlResponse {
     }
 }
 
-impl Default for HtmlResponse {
+impl Default for Html {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl IntoResponse for HtmlResponse {
+impl IntoResponse for Html {
     fn into_response(self) -> Response {
         let html_doc = html! {
             (DOCTYPE)
@@ -145,7 +146,7 @@ impl IntoResponse for HtmlResponse {
             }
         };
 
-        (self.status, Html(html_doc.into_string()))
+        (self.status, axum::response::Html(html_doc.into_string()))
             .into_response()
     }
 }
@@ -259,5 +260,31 @@ impl Render for CrawlerHints {
     fn render_to(&self, buf: &mut String) {
         let escaper = Escaper::new(buf);
         let _result = self.write_meta_list_to(escaper);
+    }
+}
+
+pub struct Rss<T>(pub T);
+
+impl<T: Into<Full<Bytes>>> IntoResponse for Rss<T> {
+    fn into_response(self) -> Response {
+        let headers = [
+            (header::CONTENT_TYPE, HeaderValue::from_static("application/rss+xml")),
+        ];
+
+        (headers, self.0.into())
+            .into_response()
+    }
+}
+
+pub struct Atom<T>(pub T);
+
+impl<T: Into<Full<Bytes>>> IntoResponse for Atom<T> {
+    fn into_response(self) -> Response {
+        let headers = [
+            (header::CONTENT_TYPE, HeaderValue::from_static("application/atom+xml")),
+        ];
+
+        (headers, self.0.into())
+            .into_response()
     }
 }

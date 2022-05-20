@@ -15,7 +15,7 @@ use tower::ServiceExt;
 use tower_http::services::ServeDir;
 use tracing::{info, error};
 
-use super::response::ErrorResponse;
+use super::response::Error;
 
 pub fn service(static_dir: &Path) -> MethodRouter<Body, Infallible> {
     let fallback_service = handle_fallback
@@ -29,12 +29,12 @@ pub fn service(static_dir: &Path) -> MethodRouter<Body, Infallible> {
         .handle_error(handle_error)
 }
 
-pub async fn handle_fallback(uri: Uri) -> ErrorResponse {
+pub async fn handle_fallback(uri: Uri) -> Error {
     info!(path = %uri.path(), "Requested static file not found");
-    ErrorResponse::StaticResourceNotFound
+    Error::StaticResourceNotFound
 }
 
-pub async fn handle_error(uri: Uri, err: io::Error) -> ErrorResponse {
+pub async fn handle_error(uri: Uri, err: io::Error) -> Error {
     error!(path = %uri.path(), err = %err, "IO error");
-    ErrorResponse::Internal
+    Error::Internal
 }

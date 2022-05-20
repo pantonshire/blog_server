@@ -1,10 +1,10 @@
 use maud::html;
 
 use crate::template;
-use super::response::HtmlResponse;
+use super::response::Html;
 
-pub async fn handle() -> HtmlResponse {
-    HtmlResponse::new()
+pub async fn handle() -> Html {
+    Html::new()
         .with_title_static("Contact")
         .with_crawler_permissive()
         .with_head(html! {

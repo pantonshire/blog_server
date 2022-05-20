@@ -10,9 +10,11 @@ use chrono::{DateTime, Utc};
 use notify::DebouncedEvent;
 use tracing::{info, warn, error};
 
-use crate::codeblock::CodeBlockRenderer;
-use crate::post::{ParseError, Post, PostId};
-use crate::posts_store::ConcurrentPostsStore;
+use crate::{
+    codeblock::CodeBlockRenderer,
+    post::{ParseError, Post, PostId},
+    posts_store::ConcurrentPostsStore,
+};
 
 pub struct Renderer {
     posts: ConcurrentPostsStore,
@@ -125,7 +127,8 @@ impl Renderer {
 
     #[tracing::instrument(skip(self))]
     fn remove(&self, target: &EventTarget) {
-        self.posts.write_blocking().remove(&target.id);
+        let mut guard = self.posts.write_blocking();
+        guard.remove(&target.id);
     }
 
     #[tracing::instrument(skip(self))]
