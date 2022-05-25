@@ -29,7 +29,7 @@ impl ConcurrentPostsStore {
     }
 
     pub async fn get(&self, id: &str) -> Option<Arc<Post>> {
-        self.read().await.get(id)
+        self.read().await.get(id).cloned()
     }
 }
 
@@ -56,12 +56,12 @@ impl PostsStore {
         }
     }
 
-    pub fn get(&self, id: &str) -> Option<Arc<Post>> {
-        self.posts.get(id).cloned()
+    pub fn get(&self, id: &str) -> Option<&Arc<Post>> {
+        self.posts.get(id)
     }
 
     pub fn insert(&mut self, post: Post) -> Option<Arc<Post>> {
-        let old_post = self.remove(post.id_str());
+        let old_post = self.remove(post.id());
 
         // Insert the post into each of the tag indexes.
         for tag in post.tags() {
@@ -109,19 +109,23 @@ impl PostsStore {
         self.posts.clear();
     }
 
+    pub fn last_updated(&self) -> Option<DateTime<Utc>> {
+        self.iter().map(|post| post.updated()).max()
+    }
+
     pub fn iter(&self)
     -> impl '_
-        + Iterator<Item = Arc<Post>>
+        + Iterator<Item = &Arc<Post>>
         + ExactSizeIterator
         + FusedIterator
         + Clone
     {
-        self.posts.values().cloned()
+        self.posts.values()
     }
 
     pub fn iter_by_created(&self)
     -> impl '_
-        + Iterator<Item = Arc<Post>>
+        + Iterator<Item = &Arc<Post>>
         + DoubleEndedIterator
         + ExactSizeIterator
         + FusedIterator

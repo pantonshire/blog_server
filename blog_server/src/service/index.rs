@@ -43,7 +43,7 @@ pub async fn handle(Extension(posts): Extension<ConcurrentPostsStore>) -> Html {
                 ul {
                     @for post in posts.read().await.iter_by_created().rev().take(5) {
                         li {
-                            a href={"/articles/" (post.id_str())} { (post.title()) }
+                            a href={"/articles/" (post.id())} { (post.title()) }
                         }
                     }
                 }

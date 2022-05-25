@@ -5,8 +5,10 @@ mod posts_store;
 mod render;
 mod service;
 mod template;
+mod time;
+mod uuid;
 
-use std::{env, fs, path::PathBuf, thread};
+use std::{env, fs, path::PathBuf, sync::Arc, thread};
 
 use axum::Server;
 use miette::{IntoDiagnostic, Context};
@@ -26,8 +28,22 @@ pub struct Config {
     posts_dir: PathBuf,
     #[knuffel(child, unwrap(argument))]
     static_dir: PathBuf,
+    #[knuffel(child, unwrap(argument))]
+    namespace_uuid: uuid::Uuid,
+    #[knuffel(child)]
+    self_ref: SelfRefConfig,
     #[knuffel(child)]
     rss: RssConfig,
+    #[knuffel(child)]
+    atom: AtomConfig,
+}
+
+#[derive(knuffel::Decode, Clone, Debug)]
+pub struct SelfRefConfig {
+    #[knuffel(child, unwrap(argument))]
+    protocol: String,
+    #[knuffel(child, unwrap(argument))]
+    domain: String,
 }
 
 #[derive(knuffel::Decode, Clone, Debug)]
@@ -38,10 +54,14 @@ pub struct RssConfig {
     title: String,
     #[knuffel(child, unwrap(argument))]
     ttl: u32,
+}
+
+#[derive(knuffel::Decode, Clone, Debug)]
+pub struct AtomConfig {
     #[knuffel(child, unwrap(argument))]
-    protocol: String,
+    num_posts: usize,
     #[knuffel(child, unwrap(argument))]
-    domain: String,
+    title: String,
 }
 
 fn main() -> miette::Result<()> {
@@ -49,7 +69,7 @@ fn main() -> miette::Result<()> {
 
     // Load the configuration from the KDL config file specified by the first command-line
     // argument.
-    let config = {
+    let config = Arc::new({
         let config_path = env::args().nth(1)
             .ok_or_else(|| miette::Error::msg("No config file specified"))?;
 
@@ -61,7 +81,7 @@ fn main() -> miette::Result<()> {
             
         knuffel::parse::<Config>(&config_path, &contents)
             .wrap_err_with(|| format!("Failed to parse config file {}", config_path))?
-    };
+    });
 
     // Create the data structure used to store the rendered posts. This uses an `Arc` internally,
     // so clones will point to the same underlying data.
@@ -71,6 +91,7 @@ fn main() -> miette::Result<()> {
 
     // Create the post renderer and the mpsc channel that will be used to communicate with it.
     let (renderer, tx) = Renderer::new(
+        config.clone(),
         posts_store.clone(),
         code_renderer,
         config.posts_dir.clone()
@@ -96,7 +117,7 @@ fn main() -> miette::Result<()> {
 }
 
 async fn run(
-    config: Config,
+    config: Arc<Config>,
     posts_store: ConcurrentPostsStore,
 ) -> miette::Result<()>
 {

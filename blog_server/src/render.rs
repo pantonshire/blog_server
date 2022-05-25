@@ -3,20 +3,23 @@ use std::{
     fs,
     io::{self, Read},
     path::PathBuf,
-    sync::mpsc,
+    sync::{Arc, mpsc},
 };
 
-use chrono::{DateTime, Utc};
+use chrono::DateTime;
 use notify::DebouncedEvent;
 use tracing::{info, warn, error};
 
 use crate::{
     codeblock::CodeBlockRenderer,
+    Config,
     post::{ParseError, Post, PostId},
     posts_store::ConcurrentPostsStore,
+    time::unix_epoch,
 };
 
 pub struct Renderer {
+    config: Arc<Config>,
     posts: ConcurrentPostsStore,
     code_renderer: CodeBlockRenderer,
     posts_dir_path: PathBuf,
@@ -25,6 +28,7 @@ pub struct Renderer {
 
 impl Renderer {
     pub fn new(
+        config: Arc<Config>,
         posts: ConcurrentPostsStore,
         code_renderer: CodeBlockRenderer,
         posts_dir_path: PathBuf,
@@ -38,6 +42,7 @@ impl Renderer {
         tx.send(DebouncedEvent::Rescan).unwrap();
 
         (Self {
+            config,
             posts,
             code_renderer,
             posts_dir_path,
@@ -185,10 +190,11 @@ impl Renderer {
     
         let (created, updated) = metadata.created()
             .and_then(|created| metadata.modified()
-                .map(|modified| (DateTime::<Utc>::from(created), DateTime::<Utc>::from(modified))))
+                .map(|modified| (DateTime::from(created), DateTime::from(modified))))
+            // If created / modified metadata is not available, default to the UNIX epoch.
             .unwrap_or_else(|_| {
-                let now = Utc::now();
-                (now, now)
+                let epoch = unix_epoch();
+                (epoch, epoch)
             });
     
         let contents = {
@@ -202,6 +208,7 @@ impl Renderer {
     
         Post::parse(
             &self.code_renderer,
+            *self.config.namespace_uuid,
             target.id.clone(),
             &target.path.to_string_lossy(),
             created,

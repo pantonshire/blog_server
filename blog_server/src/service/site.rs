@@ -16,6 +16,7 @@ use crate::{
     posts_store::ConcurrentPostsStore
 };
 use super::{
+    atom,
     contact,
     index,
     post,
@@ -26,13 +27,14 @@ use super::{
 };
 
 pub fn service(
-    config: Config,
+    config: Arc<Config>,
     posts_store: ConcurrentPostsStore,
 ) -> Router
 {
     Router::new()
         .route("/", get(index::handle))
         .route("/rss.xml", get(rss::handle))
+        .route("/atom.xml", get(atom::handle))
         .route("/contact", get(contact::handle))
         .route("/articles", get(posts_list::handle))
         .route("/articles/:post_id", get(post::handle))
@@ -40,7 +42,7 @@ pub fn service(
         .fallback(handle_fallback.into_service())
         .layer(ConcurrencyLimitLayer::new(config.concurrency_limit))
         .layer(TraceLayer::new_for_http())
-        .layer(Extension(Arc::new(config)))
+        .layer(Extension(config))
         .layer(Extension(posts_store))
 }
 

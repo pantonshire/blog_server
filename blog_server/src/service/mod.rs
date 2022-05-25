@@ -1,3 +1,4 @@
+mod atom;
 mod contact;
 mod index;
 mod post;

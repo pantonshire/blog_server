@@ -1,7 +1,7 @@
 use std::{borrow, error, fmt, ops};
 
 use chrono::{DateTime, Utc};
-use libshire::strings::ShString22;
+use libshire::{strings::ShString22, uuid::{Uuid, UuidV5Error}};
 use maud::{Markup, PreEscaped};
 
 use crate::codeblock::CodeBlockRenderer;
@@ -73,6 +73,7 @@ impl fmt::Display for PostId {
 }
 
 pub struct Post {
+    uuid: Uuid,
     id: PostId,
     title: String,
     author: String,
@@ -83,8 +84,8 @@ pub struct Post {
 }
 
 impl Post {
-    pub fn id_str(&self) -> &str {
-        &self.id
+    pub fn uuid(&self) -> Uuid {
+        self.uuid
     }
 
     pub fn id(&self) -> &PostId {
@@ -117,6 +118,7 @@ impl Post {
     
     pub fn parse(
         code_renderer: &CodeBlockRenderer,
+        namespace: Uuid,
         post_id: PostId,
         file_name: &str,
         created: DateTime<Utc>,
@@ -124,23 +126,36 @@ impl Post {
         source: &str,
     ) -> Result<Self, ParseError>
     {
-        let mdpost = MdPost::parse(file_name, source)?;
-        Ok(Self::from_mdpost(code_renderer, post_id, created, updated, mdpost))
+        MdPost::parse(file_name, source)
+            .and_then(|post| Self::from_mdpost(
+                code_renderer,
+                namespace,
+                post_id,
+                created,
+                updated,
+                post
+            ))
     }
 
     fn from_mdpost(
         code_renderer: &CodeBlockRenderer,
+        namespace: Uuid,
         id: PostId,
         created: DateTime<Utc>,
         updated: DateTime<Utc>,
         mdpost: MdPost,
-    ) -> Self
+    ) -> Result<Self, ParseError>
     {
         use pulldown_cmark::{Options, Parser, html::push_html};
         
         const PARSER_OPTIONS: Options = Options::ENABLE_TABLES
             .union(Options::ENABLE_FOOTNOTES)
             .union(Options::ENABLE_STRIKETHROUGH);
+
+        let uuid = Uuid::new_v5(namespace, &*id)
+            .map_err(|err| match err {
+                UuidV5Error::NameTooLong(len) => ParseError::IdTooLong(len),
+            })?;
 
         let mut parser = PostMdParser::new(
             Parser::new_ext(&mdpost.markdown, PARSER_OPTIONS),
@@ -150,7 +165,8 @@ impl Post {
         let mut html_buf = String::new();
         push_html(&mut html_buf, parser.by_ref());
         
-        Self {
+        Ok(Self {
+            uuid,
             id,
             title: mdpost.title,
             author: mdpost.author,
@@ -158,7 +174,7 @@ impl Post {
             tags: mdpost.tags,
             created,
             updated,
-        }
+        })
     }
 }
 
@@ -281,13 +297,15 @@ impl MdPost {
 pub enum ParseError {
     MissingHeader,
     InvalidHeader(Box<knuffel::Error>),
+    IdTooLong(usize),
 }
 
 impl fmt::Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ParseError::MissingHeader => write!(f, "Post file has no header"),
-            ParseError::InvalidHeader(err) => fmt::Display::fmt(err, f),
+            Self::MissingHeader => write!(f, "post file has no header"),
+            Self::InvalidHeader(err) => fmt::Display::fmt(err, f),
+            Self::IdTooLong(len) => write!(f, "post id too long ({} bytes)", len),
         }
     }
 }
