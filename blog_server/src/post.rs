@@ -2,7 +2,7 @@ use std::{borrow, error, fmt, ops};
 
 use chrono::{DateTime, Utc};
 use libshire::{strings::ShString22, uuid::{Uuid, UuidV5Error}};
-use maud::{Markup, PreEscaped};
+use maud::{Markup, PreEscaped, html};
 
 use crate::codeblock::CodeBlockRenderer;
 
@@ -76,6 +76,7 @@ pub struct Post {
     uuid: Uuid,
     id: PostId,
     title: String,
+    subtitle: Option<String>,
     author: String,
     html: Markup,
     tags: Vec<ShString22>,
@@ -94,6 +95,10 @@ impl Post {
 
     pub fn title(&self) -> &str {
         &self.title
+    }
+
+    pub fn subtitle(&self) -> Option<&str> {
+        self.subtitle.as_deref()
     }
 
     pub fn author(&self) -> &str {
@@ -169,6 +174,7 @@ impl Post {
             uuid,
             id,
             title: mdpost.title,
+            subtitle: mdpost.subtitle,
             author: mdpost.author,
             html: PreEscaped(html_buf),
             tags: mdpost.tags,
@@ -226,6 +232,12 @@ impl<'e, 'p, I> Iterator for PostMdParser<'p, I> where I: Iterator<Item = pulldo
                 Event::Html(CowStr::Boxed(highlighted.into_string().into_boxed_str()))
             },
 
+            Event::Code(code) => {
+                Event::Html(CowStr::Boxed(html! {
+                    code .inline_code { (code) }
+                }.into_string().into_boxed_str()))
+            },
+
             event => {
                 match &event {
                     Event::Start(Tag::Link(LinkType::Inline | LinkType::Autolink, destination, _title)) => {
@@ -253,6 +265,8 @@ struct HeaderNode {
     #[knuffel(child, unwrap(argument))]
     title: String,
     #[knuffel(child, unwrap(argument))]
+    subtitle: Option<String>,
+    #[knuffel(child, unwrap(argument))]
     author: String,
     #[knuffel(children(name="tag"))]
     tags: Vec<TagNode>,
@@ -268,6 +282,7 @@ struct TagNode {
 struct MdPost {
     markdown: String,
     title: String,
+    subtitle: Option<String>,
     author: String,
     tags: Vec<ShString22>,
 }
@@ -287,6 +302,7 @@ impl MdPost {
         Ok(Self {
             markdown: md.to_owned(),
             title: header.title,
+            subtitle: header.subtitle,
             author: header.author,
             tags: header.tags.into_iter().map(|tag| tag.tag.into()).collect(),
         })

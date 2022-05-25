@@ -54,12 +54,18 @@ impl CodeBlockRenderer {
 
         let html_out = html_gen.finalize();
 
-        //TODO: show context & language
-
         html! {
-            pre .codeblock {
-                code {
-                    (PreEscaped(html_out))
+            .codeblock {
+                @if context.is_some() || !lang.is_empty() {
+                    .codeblock_banner {
+                        span .codeblock_language { (lang) }
+                        span .codeblock_context { (context.unwrap_or("")) }
+                    }
+                }
+                pre .codeblock_code {
+                    code {
+                        (PreEscaped(html_out))
+                    }
                 }
             }
         }
