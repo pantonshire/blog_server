@@ -16,7 +16,7 @@ pub async fn handle(Extension(posts): Extension<ConcurrentPostsStore>) -> Html {
         })
         .with_body(template::main_page(html! {
             section .content_section {
-                h2 { "Who I am" }
+                h2 { "About me" }
                 p {
                     "Hi! I'm Tom, a computer science student and hobbyist programmer."
                 }
