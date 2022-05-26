@@ -2,7 +2,7 @@ use maud::{html, Markup};
 
 pub fn main_page(content: Markup) -> Markup {
     html! {
-        header #page_header .sticky_header {
+        header #page_header {
             nav #page_nav {
                 #title_box {
                     a href="/" { "Pantonshire" }
@@ -27,7 +27,21 @@ pub fn main_page(content: Markup) -> Markup {
 
         footer #page_footer {
             #page_footer_content {
-                span { "Here is some footer text" }
+                ul {
+                    li {
+                        "\"What is a footer? A miserable little pile of secrets\""
+                    }
+                    li {
+                        a href="https://github.com/pantonshire/blog_server" {
+                            "Source code for this site"
+                        }
+                    }
+                    li {
+                        a rel="me" href="https://tech.lgbt/@pantonshire" {
+                            "Backlink for Mastodon"
+                        }
+                    }
+                }
             }
         }
     }
