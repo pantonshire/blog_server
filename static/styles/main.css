@@ -209,10 +209,13 @@ li {
 }
 
 .codeblock {
+    margin-top: 1.5rem;
+    margin-bottom: 2rem;
     background-color: #FAF9F6;
     border-radius: 5px;
     font-size: 1.1rem;
     line-height: 1.4;
+    box-shadow: 3px 3px 10px #C9C9C9;
 }
 
 .codeblock_banner {
@@ -230,8 +233,9 @@ li {
 .codeblock_code {
     padding-left: 1rem;
     padding-right: 1rem;
-    padding-top: 0.5rem;
+    padding-top: 1rem;
     padding-bottom: 1rem;
+    margin: 0;
 }
 
 .inline_code {
@@ -242,6 +246,16 @@ li {
 
 .codeblock_banner {
     background-color: #94BFBE;
+    /* background-color: #706677; */
+}
+
+.article_content img {
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    box-shadow: 3px 3px 10px #C9C9C9;
 }
 
 /* 
@@ -249,4 +263,5 @@ Palette
 #94BFBE
 #F5F5F0
 #FFFFFF
+#706677
 */

@@ -39,6 +39,7 @@ pub fn service(
         .route("/articles", get(posts_list::handle))
         .route("/articles/:post_id", get(post::handle))
         .nest("/static", static_content::service(&config.static_dir))
+        .nest("/article_media", static_content::service(&config.post_media_dir))
         .fallback(handle_fallback.into_service())
         .layer(ConcurrencyLimitLayer::new(config.concurrency_limit))
         .layer(TraceLayer::new_for_http())
