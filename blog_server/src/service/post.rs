@@ -22,6 +22,8 @@ pub async fn handle(
         .with_head(html! {
             link href="/static/styles/main.css" rel="stylesheet";
             link href="/static/styles/code.css" rel="stylesheet";
+            link rel="alternate" type="application/atom+xml" href="/atom.xml";
+            link rel="alternate" type="application/rss+xml" href="/rss.xml";
         })
         .with_body(template::main_page(html! {
             section .article_header {

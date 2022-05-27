@@ -13,6 +13,8 @@ pub async fn handle(Extension(posts): Extension<ConcurrentPostsStore>) -> Html {
         .with_crawler_permissive()
         .with_head(html! {
             link href="/static/styles/main.css" rel="stylesheet";
+            link rel="alternate" type="application/atom+xml" href="/atom.xml";
+            link rel="alternate" type="application/rss+xml" href="/rss.xml";
         })
         .with_body(template::main_page(html! {
             section .content_section {
