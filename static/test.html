@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="robots" content="index,follow">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pantonshire</title>
+    <link href="/static/styles/main.css" rel="stylesheet">
+</head>
+
+<body>
+    <header id="page_header">
+        <nav id="page_nav">
+            <div id="title_box"><a href="/">Pantonshire</a></div>
+            <div id="right_nav_box">
+                <ul>
+                    <li><a href="/articles">Articles</a></li>
+                    <li><a href="/atom.xml">Atom</a></li>
+                    <li><a href="/rss.xml">RSS</a></li>
+                    <li><a href="https://github.com/pantonshire">GitHub</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <main id="page_main">
+        <div id="content">
+            <section class="content_section">
+                <p>Hi! I'm Tom, a computer science student and hobbyist programmer, and definitely not an egg-shaped robot.</p>
+                <figure><img src="/static/images/tombot_450.png"
+                        alt="A drawing by @smolrobots (on Twitter) of me as a robot. It has an egg-shaped body and a smiling face, and is doing a little dance next to a Raspberry Pi."
+                        width="256">
+                    <figcaption class="quiet">Drawn by <a href="https://twitter.com/smolrobots">@smolrobots</a>
+                    </figcaption>
+                </figure>
+            </section>
+            <section class="content_section">
+                <h2>Some things I've made</h2>
+                <ul>
+                    <li><a href="https://github.com/pantonshire/goldcrest">Goldcrest</a>, a proxy for the Twitter v1 API using gRPC. I made it to address the problem of centralised rate-limit tracking to avoid exceeding to Twitter's quotas.</li>
+                    <li><a href="https://github.com/pantonshire/smolbotbot">Smolbotbot</a>, an art archival project for the drawings of <a href="https://twitter.com/smolrobots">@smolrobots</a>! A Twitter bot continuously checks for new small robots, and the data it collects is made available at <a href="https://smolbotbot.com">smolbotbot.com</a>.</li>
+                    <li><a href="https://github.com/pantonshire/enumscribe">Enumscribe</a>, a Rust procedural macro library for generating conversion methods between enum types and strings, with support for <a href="https://serde.rs">Serde</a>.</li>
+                    <li><a href="https://github.com/pantonshire/tasque">Tasque</a>, a very in-progress cron-like job scheduler that I'm having a lot of fun working on.</li>
+                </ul>
+            </section>
+            <section class="content_section">
+                <h2>Articles</h2>
+                <p>Some recent ones:</p>
+                <ul class="articles_list">
+                    <li>
+                        <h3><a href="/articles/structs">How the struct gets made</a></h3>
+                        <p class="article_list_subtitle">In which peek behind the curtain to see how compilers represent our data types.</p>
+                        <p class="article_list_published_date">Published 2022/05/25</p>
+                    </li>
+                    <li>
+                        <h3><a href="/articles/baa">Testing II</a></h3>
+                    </li>
+                    <li>
+                        <a href="/articles/foo">Foo Baa</a>
+                    </li>
+                    <li>
+                        <a href="/articles/test">Testing</a>
+                    </li>
+                </ul>
+                <p><a href="/articles">See the rest</a></p>
+            </section>
+        </div>
+    </main>
+    <footer id="page_footer">
+        <div id="page_footer_content">
+            <ul>
+                <li>&quot;What is a footer? A miserable little pile of secrets&quot;</li>
+                <li><a href="https://github.com/pantonshire/blog_server">Source code for this site</a></li>
+                <li><a rel="me" href="https://tech.lgbt/@pantonshire">Backlink for Mastodon</a></li>
+            </ul>
+        </div>
+    </footer>
+</body>
+
+</html>

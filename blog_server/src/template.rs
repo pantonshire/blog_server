@@ -29,7 +29,7 @@ pub fn main_page(content: Markup) -> Markup {
             #page_footer_content {
                 ul {
                     li {
-                        "\"What is a footer? A miserable little pile of secrets\""
+                        "\"What is a footer? A miserable little pile of secrets.\""
                     }
                     li {
                         a href="https://github.com/pantonshire/blog_server" {

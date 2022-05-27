@@ -20,12 +20,15 @@ pub async fn handle(Extension(posts): Extension<ConcurrentPostsStore>) -> Html {
                 p {
                     "A collection of words I have written, against my better judgement."
                 }
-                ul {
+                ul .articles_list {
                     @for post in posts.read().await.iter_by_created().rev() {
                         li {
-                            a href={"/articles/" (post.id())} { (post.title()) }
-                            span class="quiet" {
-                                " — " (post.created().format("%Y/%m/%d"))
+                            h3 { a href={"/articles/" (post.id())} { (post.title()) } }
+                            @if let Some(subtitle) = post.subtitle() {
+                                p .article_list_subtitle { (subtitle) }
+                            }
+                            p .article_list_published_date {
+                                "Published " (post.created().format("%Y/%m/%d"))
                             }
                         }
                     }

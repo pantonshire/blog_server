@@ -88,15 +88,58 @@ body {
     color: white;
 }
 
+h1 {
+    font-size: 2rem;
+}
+
+h2 {
+    font-size: 1.75rem;
+}
+
+h1,
+h2,
+h3 {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+figure {
+    width: fit-content;
+    margin: 0;
+}
+
+figcaption {
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+figcaption a {
+    color: inherit;
+}
+
+a:link {
+    color: #0960BA;
+}
+
+a:visited {
+    color: #72109B;
+}
+
+ul {
+    list-style-type: circle;
+}
+
+li {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
 #page_header {
     background-color: #94BFBE;
     color: white;
 }
 
 #page_nav {
-    /* display: flex;
-    flex-direction: row;
-    justify-content: space-between; */
     padding: 1rem 1rem;
     margin: 0 auto;
     max-width: 60rem;
@@ -119,12 +162,10 @@ body {
     display: grid;
     grid-template-columns: repeat(5, auto);
     grid-template-rows: 100%;
-    /* column-gap: 1.5rem; */
     column-gap: 1rem;
     margin-top: 0;
     margin-bottom: 0;
     padding: 0;
-    /* font-size: 1.5rem; */
     font-size: 1.2rem;
     overflow-x: auto;
     white-space: nowrap;
@@ -194,7 +235,7 @@ body {
 
 #content {
     margin: 0 auto;
-    padding: 1rem;
+    padding: 1rem 1rem 2rem 1rem;
     max-width: 60rem;
 }
 
@@ -206,41 +247,25 @@ body {
     color: #898989;
 }
 
-h1 {
-    font-size: 2rem;
+ul.articles_list {
+    list-style-type: none;
 }
 
-h2 {
-    font-size: 1.75rem;
+.articles_list li {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
 }
 
-h1,
-h2 {
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
+.article_list_subtitle {
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
 }
 
-figure {
-    width: fit-content;
-    margin: 0;
-}
-
-figcaption {
-    text-align: center;
-    font-size: 0.9rem;
-}
-
-figcaption a {
-    color: inherit;
-}
-
-ul {
-    list-style-type: circle;
-}
-
-li {
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
+.article_list_published_date {
+    color: #898989;
+    font-size: 1rem;
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
 }
 
 .article_header {
@@ -348,6 +373,14 @@ li {
     
     #page_nav #title_box {
         margin-bottom: 0;
+    }
+
+    #page_footer_content ul {
+        grid-template-columns: repeat(3, auto);
+        grid-template-rows: 100%;
+        column-gap: 1rem;
+        row-gap: 0;
+        width: fit-content;
     }
 
     #content {
