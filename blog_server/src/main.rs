@@ -29,6 +29,8 @@ pub struct Config {
     #[knuffel(child, unwrap(argument))]
     favicon_dir: PathBuf,
     #[knuffel(child, unwrap(argument))]
+    robots_path: PathBuf,
+    #[knuffel(child, unwrap(argument))]
     posts_dir: PathBuf,
     #[knuffel(child, unwrap(argument))]
     post_media_dir: PathBuf,
