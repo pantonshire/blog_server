@@ -247,6 +247,10 @@ li {
     color: #898989;
 }
 
+.quiet a {
+    color: inherit;
+}
+
 ul.articles_list {
     list-style-type: none;
 }
