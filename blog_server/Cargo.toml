@@ -13,6 +13,8 @@ axum = "0.5"
 # Middleware for the web server
 tower = { version = "0.4", features = ["limit"] }
 tower-http = { version = "0.3", features = ["fs", "trace"] }
+# MIME type implementation
+mime = "0.3"
 # Compile-time HTTP templating
 maud = "0.23"
 # Serialisation for RSS and Atom

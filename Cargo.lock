@@ -168,6 +168,7 @@ dependencies = [
  "libshire",
  "maud",
  "miette",
+ "mime",
  "notify",
  "pulldown-cmark",
  "rss",

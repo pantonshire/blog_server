@@ -11,18 +11,29 @@ use axum::{
     routing::{get_service, MethodRouter},
 };
 use libshire::convert::Empty;
+use mime::Mime;
 use tower::ServiceExt;
-use tower_http::services::ServeDir;
+use tower_http::services::{ServeDir, ServeFile};
 use tracing::{info, error};
 
 use super::response::Error;
 
-pub fn service(static_dir: &Path) -> MethodRouter<Body, Infallible> {
+pub fn file_service(file_path: &Path, mime: Option<&Mime>) -> MethodRouter<Body, Infallible> {
+    let serve_file = match mime {
+        Some(mime) => ServeFile::new_with_mime(file_path, mime),
+        None => ServeFile::new(file_path),
+    };
+
+    get_service(serve_file)
+        .handle_error(handle_error)
+}
+
+pub fn dir_service(dir_path: &Path) -> MethodRouter<Body, Infallible> {
     let fallback_service = handle_fallback
         .into_service()
         .map_err(Empty::elim::<io::Error>);
     
-    let serve_dir = ServeDir::new(static_dir)
+    let serve_dir = ServeDir::new(dir_path)
         .fallback(fallback_service);
 
     get_service(serve_dir)
