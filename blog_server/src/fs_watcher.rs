@@ -7,7 +7,7 @@ use std::{
 use miette::{IntoDiagnostic, WrapErr};
 use notify::{
     DebouncedEvent,
-    FsEventWatcher,
+    RecommendedWatcher,
     RecursiveMode,
     Watcher,
     watcher,
@@ -17,7 +17,7 @@ use tracing::info;
 pub fn start_watching(
     tx: mpsc::Sender<DebouncedEvent>,
     watch_path: &Path
-) -> miette::Result<FsEventWatcher>
+) -> miette::Result<RecommendedWatcher>
 {
     let mut watcher = watcher(tx, Duration::from_secs(2))
         .into_diagnostic()
