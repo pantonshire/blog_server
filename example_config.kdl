@@ -1,0 +1,26 @@
+bind "127.0.0.1:8080"
+concurrency-limit 128
+
+static-dir "./content/static/"
+favicon-dir "./content/favicon/"
+robots-path "./content/robots.txt"
+posts-dir "./posts/"
+post-media-dir "./article_media/"
+
+namespace-uuid "00000000-0000-0000-0000-000000000000"
+
+self-ref {
+    protocol "http"
+    domain "127.0.0.1:8080"
+}
+
+rss {
+    num-posts 20
+    title "Pantonshire"
+    ttl 360
+}
+
+atom {
+    num-posts 20
+    title "Pantonshire"
+}
