@@ -2,7 +2,8 @@ FROM docker.io/library/rust:1.60-alpine as builder
 WORKDIR /app/
 RUN apk update && apk add --no-cache musl-dev
 COPY Cargo.toml Cargo.lock ./
-COPY src/ ./src/
+COPY blog_server/ ./blog_server/
+COPY utils/ ./utils/
 RUN cargo build --release
 
 FROM docker.io/library/alpine:latest as runtime
