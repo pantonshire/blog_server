@@ -1,10 +1,10 @@
 use axum::extract::Extension;
 use maud::html;
 
-use crate::{
-    posts_store::ConcurrentPostsStore,
-    template,
-};
+use blog::db::ConcurrentPostsStore;
+
+use crate::template;
+
 use super::response::Html;
 
 pub async fn handle(Extension(posts): Extension<ConcurrentPostsStore>) -> Html {

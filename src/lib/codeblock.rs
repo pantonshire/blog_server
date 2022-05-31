@@ -3,7 +3,7 @@ use syntect::html::{ClassedHTMLGenerator, ClassStyle};
 use syntect::parsing::SyntaxSet;
 use syntect::util::LinesWithEndings;
 
-const CLASS_STYLE: ClassStyle = ClassStyle::SpacedPrefixed { prefix: "cb_" };
+pub const CLASS_STYLE: ClassStyle = ClassStyle::SpacedPrefixed { prefix: "cb_" };
 
 pub struct CodeBlockRenderer {
     syntax_set: SyntaxSet,
@@ -69,5 +69,11 @@ impl CodeBlockRenderer {
                 }
             }
         }
+    }
+}
+
+impl Default for CodeBlockRenderer {
+    fn default() -> Self {
+        Self::new()
     }
 }

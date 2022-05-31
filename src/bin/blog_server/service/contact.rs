@@ -1,6 +1,7 @@
 use maud::html;
 
 use crate::template;
+
 use super::response::Html;
 
 pub async fn handle() -> Html {

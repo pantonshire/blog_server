@@ -5,12 +5,14 @@ use axum::{
     extract::Extension,
 };
 
-use super::response::Rss;
-use crate::{
-    Config,
-    posts_store::ConcurrentPostsStore,
+use blog::{
+    db::ConcurrentPostsStore,
     time::unix_epoch,
 };
+
+use crate::Config;
+
+use super::response::Rss;
 
 pub async fn handle(
     Extension(config): Extension<Arc<Config>>,

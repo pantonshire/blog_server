@@ -1,12 +1,7 @@
-mod codeblock;
 mod fs_watcher;
-mod post;
-mod posts_store;
 mod render;
 mod service;
 mod template;
-mod time;
-mod uuid;
 
 use std::{env, fs, path::PathBuf, sync::Arc, thread};
 
@@ -14,8 +9,12 @@ use axum::Server;
 use miette::{IntoDiagnostic, Context};
 use tracing::info;
 
-use codeblock::CodeBlockRenderer;
-use posts_store::ConcurrentPostsStore;
+use blog::{
+    codeblock::CodeBlockRenderer,
+    db::ConcurrentPostsStore,
+    uuid,
+};
+
 use render::Renderer;
 
 #[derive(knuffel::Decode, Clone, Debug)]

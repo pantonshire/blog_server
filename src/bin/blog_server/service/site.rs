@@ -11,10 +11,10 @@ use tower::limit::ConcurrencyLimitLayer;
 use tower_http::trace::TraceLayer;
 use tracing::info;
 
-use crate::{
-    Config,
-    posts_store::ConcurrentPostsStore
-};
+use blog::db::ConcurrentPostsStore;
+
+use crate::Config;
+
 use super::{
     atom,
     contact,

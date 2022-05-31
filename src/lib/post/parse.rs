@@ -1,187 +1,73 @@
-use std::{borrow, error, fmt, ops};
+use std::{error, fmt};
 
 use chrono::{DateTime, Utc};
 use libshire::{strings::ShString22, uuid::{Uuid, UuidV5Error}};
-use maud::{Markup, PreEscaped, html};
+use maud::{html, PreEscaped};
 
 use crate::codeblock::CodeBlockRenderer;
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
-pub struct PostId(ShString22);
+use super::{id::PostId, Post};
 
-impl PostId {
-    pub fn from_file_name(file_name: &str) -> Option<Self> {
-        const POST_FILE_EXTENSION: &str = ".kdl.md";
-
-        fn is_invalid_char(c: char) -> bool {
-            c == '/' || c == '\\' || c == '.'
-        }
-
-        let prefix = file_name
-            .strip_suffix(POST_FILE_EXTENSION)?;
-
-        if prefix.contains(is_invalid_char) {
-            return None;
-        }
-
-        Some(Self(ShString22::new_from_str(prefix)))
-    }
-}
-
-impl ops::Deref for PostId {
-    type Target = str;
-
-    fn deref(&self) -> &Self::Target {
-        &*self.0
-    }
-}
-
-impl ops::DerefMut for PostId {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut *self.0
-    }
-}
-
-impl AsRef<str> for PostId {
-    fn as_ref(&self) -> &str {
-        self
-    }
-}
-
-impl AsMut<str> for PostId {
-    fn as_mut(&mut self) -> &mut str {
-        self
-    }
-}
-
-impl borrow::Borrow<str> for PostId {
-    fn borrow(&self) -> &str {
-        self
-    }
-}
-
-impl borrow::BorrowMut<str> for PostId {
-    fn borrow_mut(&mut self) -> &mut str {
-        self
-    }
-}
-
-impl fmt::Display for PostId {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt::Display::fmt(&**self, f)
-    }
-}
-
-pub struct Post {
-    uuid: Uuid,
-    id: PostId,
-    title: String,
-    subtitle: Option<String>,
-    author: String,
-    html: Markup,
-    tags: Vec<ShString22>,
+pub fn parse(
+    code_renderer: &CodeBlockRenderer,
+    namespace: Uuid,
+    post_id: PostId,
+    file_name: &str,
     created: DateTime<Utc>,
     updated: DateTime<Utc>,
-}
-
-impl Post {
-    pub fn uuid(&self) -> Uuid {
-        self.uuid
-    }
-
-    pub fn id(&self) -> &PostId {
-        &self.id
-    }
-
-    pub fn title(&self) -> &str {
-        &self.title
-    }
-
-    pub fn subtitle(&self) -> Option<&str> {
-        self.subtitle.as_deref()
-    }
-
-    pub fn author(&self) -> &str {
-        &self.author
-    }
-
-    pub fn html(&self) -> PreEscaped<&str> {
-        PreEscaped(&self.html.0)
-    }
-
-    pub fn tags(&self) -> &[ShString22] {
-        &self.tags
-    }
-
-    pub fn created(&self) -> DateTime<Utc> {
-        self.created
-    }
-
-    pub fn updated(&self) -> DateTime<Utc> {
-        self.updated
-    }
-    
-    pub fn parse(
-        code_renderer: &CodeBlockRenderer,
-        namespace: Uuid,
-        post_id: PostId,
-        file_name: &str,
-        created: DateTime<Utc>,
-        updated: DateTime<Utc>,
-        source: &str,
-    ) -> Result<Self, ParseError>
-    {
-        MdPost::parse(file_name, source)
-            .and_then(|post| Self::from_mdpost(
-                code_renderer,
-                namespace,
-                post_id,
-                created,
-                updated,
-                post
-            ))
-    }
-
-    fn from_mdpost(
-        code_renderer: &CodeBlockRenderer,
-        namespace: Uuid,
-        id: PostId,
-        created: DateTime<Utc>,
-        updated: DateTime<Utc>,
-        mdpost: MdPost,
-    ) -> Result<Self, ParseError>
-    {
-        use pulldown_cmark::{Options, Parser, html::push_html};
-        
-        const PARSER_OPTIONS: Options = Options::ENABLE_TABLES
-            .union(Options::ENABLE_FOOTNOTES)
-            .union(Options::ENABLE_STRIKETHROUGH);
-
-        let uuid = Uuid::new_v5(namespace, &*id)
-            .map_err(|err| match err {
-                UuidV5Error::NameTooLong(len) => ParseError::IdTooLong(len),
-            })?;
-
-        let mut parser = PostMdParser::new(
-            Parser::new_ext(&mdpost.markdown, PARSER_OPTIONS),
-            code_renderer
-        );
-
-        let mut html_buf = String::new();
-        push_html(&mut html_buf, parser.by_ref());
-        
-        Ok(Self {
-            uuid,
-            id,
-            title: mdpost.title,
-            subtitle: mdpost.subtitle,
-            author: mdpost.author,
-            html: PreEscaped(html_buf),
-            tags: mdpost.tags,
+    source: &str,
+) -> Result<Post, ParseError>
+{
+    MdPost::parse(file_name, source)
+        .and_then(|post| render_mdpost(
+            code_renderer,
+            namespace,
+            post_id,
             created,
             updated,
-        })
-    }
+            post
+        ))
+}
+
+fn render_mdpost(
+    code_renderer: &CodeBlockRenderer,
+    namespace: Uuid,
+    id: PostId,
+    created: DateTime<Utc>,
+    updated: DateTime<Utc>,
+    mdpost: MdPost,
+) -> Result<Post, ParseError>
+{
+    use pulldown_cmark::{Options, Parser, html::push_html};
+    
+    const PARSER_OPTIONS: Options = Options::ENABLE_TABLES
+        .union(Options::ENABLE_FOOTNOTES)
+        .union(Options::ENABLE_STRIKETHROUGH);
+
+    let uuid = Uuid::new_v5(namespace, &*id)
+        .map_err(|err| match err {
+            UuidV5Error::NameTooLong(len) => ParseError::IdTooLong(len),
+        })?;
+
+    let mut parser = PostMdParser::new(
+        Parser::new_ext(&mdpost.markdown, PARSER_OPTIONS),
+        code_renderer
+    );
+
+    let mut html_buf = String::new();
+    push_html(&mut html_buf, parser.by_ref());
+    
+    Ok(Post {
+        uuid,
+        id,
+        title: mdpost.title,
+        subtitle: mdpost.subtitle,
+        author: mdpost.author,
+        html: PreEscaped(html_buf),
+        tags: mdpost.tags,
+        created,
+        updated,
+    })
 }
 
 /// Iterator struct which wraps another event iterator in order to render code blocks, collect the links
@@ -283,7 +169,7 @@ struct MdPost {
     markdown: String,
     title: String,
     subtitle: Option<String>,
-    author: String,
+    author: ShString22,
     tags: Vec<ShString22>,
 }
 
@@ -303,7 +189,7 @@ impl MdPost {
             markdown: md.to_owned(),
             title: header.title,
             subtitle: header.subtitle,
-            author: header.author,
+            author: header.author.into(),
             tags: header.tags.into_iter().map(|tag| tag.tag.into()).collect(),
         })
     }

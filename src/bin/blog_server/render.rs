@@ -10,13 +10,14 @@ use chrono::DateTime;
 use notify::DebouncedEvent;
 use tracing::{info, warn, error};
 
-use crate::{
+use blog::{
     codeblock::CodeBlockRenderer,
-    Config,
-    post::{ParseError, Post, PostId},
-    posts_store::ConcurrentPostsStore,
+    post::{parse as parse_post, ParseError, Post, PostId},
+    db::ConcurrentPostsStore,
     time::unix_epoch,
 };
+
+use crate::Config;
 
 pub struct Renderer {
     config: Arc<Config>,
@@ -206,7 +207,7 @@ impl Renderer {
     
         drop(fd);
     
-        Post::parse(
+        parse_post(
             &self.code_renderer,
             *self.config.namespace_uuid,
             target.id.clone(),

@@ -1,10 +1,11 @@
-use std::env;
-use std::process;
+use std::{env, process};
 
-use syntect::highlighting::ThemeSet;
-use syntect::html::{css_for_theme_with_class_style, ClassStyle};
+use syntect::{
+    highlighting::ThemeSet,
+    html::css_for_theme_with_class_style,
+};
 
-const CLASS_STYLE: ClassStyle = ClassStyle::SpacedPrefixed { prefix: "cb_" };
+use blog::codeblock::CLASS_STYLE;
 
 fn main() {
     let theme_set = ThemeSet::load_defaults();

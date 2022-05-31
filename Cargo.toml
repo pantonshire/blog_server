@@ -1,6 +1,35 @@
-[workspace]
+[package]
+name = "blog"
+version = "0.2.0"
+edition = "2021"
 
-members = [
-    "blog_server",
-    "utils/css_gen"
-]
+[lib]
+name = "blog"
+path = "src/lib/lib.rs"
+
+[[bin]]
+name = "blog_server"
+path = "src/bin/blog_server/main.rs"
+
+[[bin]]
+name = "css_gen"
+path = "src/bin/css_gen/main.rs"
+
+[dependencies]
+libshire = { git = "https://github.com/pantonshire/libshire" }
+tokio = { version = "1", features = ["full"] }
+axum = "0.5"
+tower = { version = "0.4", features = ["limit"] }
+tower-http = { version = "0.3", features = ["fs", "trace"] }
+mime = "0.3"
+maud = "0.23"
+atom_syndication = "0.11"
+rss = "2"
+knuffel = "2"
+pulldown-cmark = "0.9"
+syntect = "4"
+notify = "4"
+chrono = "0.4"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+miette = { version = "4", features = ["fancy"] }
