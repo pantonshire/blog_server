@@ -21,7 +21,7 @@ pub async fn handle(
     let (rss_items, updated) = {
         let guard = posts.read().await;
 
-        let rss_items = guard.iter_by_created()
+        let rss_items = guard.iter_by_published()
             .take(config.rss.num_posts)
             .map(|post| {
                 rss::ItemBuilder::default()
@@ -36,7 +36,7 @@ pub async fn handle(
                         config.self_ref.domain,
                         post.id()
                     )))
-                    .pub_date(Some(post.created().to_rfc2822()))
+                    .pub_date(Some(post.published().to_rfc2822()))
                     .build()
             })
             .collect::<Vec<rss::Item>>();

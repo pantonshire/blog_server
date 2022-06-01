@@ -12,9 +12,8 @@ use tracing::{info, warn, error};
 
 use blog::{
     codeblock::CodeBlockRenderer,
-    post::{parse as parse_post, ParseError, Post, PostId},
+    post::{Error as ParseError, Post, Id},
     db::ConcurrentPostsStore,
-    time::unix_epoch,
 };
 
 use crate::Config;
@@ -189,14 +188,10 @@ impl Renderer {
             return Err(Error::NotAFile);
         }
     
-        let (created, updated) = metadata.created()
-            .and_then(|created| metadata.modified()
-                .map(|modified| (DateTime::from(created), DateTime::from(modified))))
-            // If created / modified metadata is not available, default to the UNIX epoch.
-            .unwrap_or_else(|_| {
-                let epoch = unix_epoch();
-                (epoch, epoch)
-            });
+        let updated = metadata
+            .modified()
+            .ok()
+            .map(DateTime::from);
     
         let contents = {
             let mut buf = String::new();
@@ -207,12 +202,10 @@ impl Renderer {
     
         drop(fd);
     
-        parse_post(
+        Post::new_from_str(
             &self.code_renderer,
             *self.config.namespace_uuid,
             target.id.clone(),
-            &target.path.to_string_lossy(),
-            created,
             updated,
             &contents
         ).map_err(|err| Error::Parsing(Box::new(err)))
@@ -229,7 +222,7 @@ enum Event {
 
 struct EventTarget {
     pub path: PathBuf,
-    pub id: PostId,
+    pub id: Id,
 }
 
 impl fmt::Debug for EventTarget {
@@ -242,7 +235,7 @@ impl EventTarget {
     pub fn from_path(path: PathBuf) -> Option<Self> {
         path.file_name()
             .and_then(|file_name| file_name.to_str())
-            .and_then(PostId::from_file_name)
+            .and_then(Id::from_file_name)
             .map(|id| Self {
                 path,
                 id,

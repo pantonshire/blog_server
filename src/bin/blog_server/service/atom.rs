@@ -17,7 +17,7 @@ pub async fn handle(
         let guard = posts.read().await;
 
         let atom_entries = guard
-            .iter_by_created()
+            .iter_by_published()
             .take(config.atom.num_posts)
             .map(|post| {
                 atom::EntryBuilder::default()

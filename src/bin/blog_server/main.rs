@@ -1,3 +1,4 @@
+mod config;
 mod fs_watcher;
 mod render;
 mod service;

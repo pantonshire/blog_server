@@ -31,7 +31,7 @@ pub async fn handle(
                 @if let Some(subtitle) = post.subtitle() {
                     p .article_subtitle { (subtitle) }
                 }
-                p .article_published_date { "Published " (post.created().format("%Y/%m/%d")) }
+                p .article_published_date { "Published " (post.published().format("%Y/%m/%d")) }
             }
             article .article_content {
                 (post.html())

@@ -8,7 +8,7 @@ use chrono::{DateTime, Utc};
 use libshire::strings::ShString22;
 use tokio::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 
-use crate::post::{Post, PostId};
+use crate::post::{Post, Id};
 
 #[derive(Clone)]
 pub struct ConcurrentPostsStore {
@@ -40,9 +40,9 @@ impl Default for ConcurrentPostsStore {
 }
 
 pub struct PostsStore {
-    posts: HashMap<PostId, Arc<Post>>,
-    created_ix: BTreeSet<CreatedIxEntry>,
-    tags_ix: HashMap<ShString22, HashSet<PostId>>,
+    posts: HashMap<Id, Arc<Post>>,
+    published_ix: BTreeSet<PublishedIxEntry>,
+    tags_ix: HashMap<ShString22, HashSet<Id>>,
 }
 
 // TODO: shrink the various collections on removal to deallocate unneeded space
@@ -51,7 +51,7 @@ impl PostsStore {
     pub fn new() -> Self {
         Self {
             posts: HashMap::new(),
-            created_ix: BTreeSet::new(),
+            published_ix: BTreeSet::new(),
             tags_ix: HashMap::new(),
         }
     }
@@ -73,8 +73,8 @@ impl PostsStore {
             }.insert(post.id().clone());
         }
 
-        // Insert the post into the correct position of the created BTree index.
-        self.created_ix.insert(CreatedIxEntry::new(&post));
+        // Insert the post into the correct position of the published BTree index.
+        self.published_ix.insert(PublishedIxEntry::new(&post));
 
         // Wrap the post with an atomic reference counter and insert it into the main posts
         // `HashMap`.
@@ -86,9 +86,9 @@ impl PostsStore {
     pub fn remove(&mut self, id: &str) -> Option<Arc<Post>> {
         match self.posts.remove(id) {
             Some(post) => {
-                // Remove the post's entry in the created index.
-                self.created_ix
-                    .remove(&CreatedIxEntry::new(&post));
+                // Remove the post's entry in the published index.
+                self.published_ix
+                    .remove(&PublishedIxEntry::new(&post));
 
                 // Remove every occurence of the post from the tags index.
                 for tag in post.tags() {
@@ -105,7 +105,7 @@ impl PostsStore {
 
     pub fn clear(&mut self) {
         self.tags_ix.clear();
-        self.created_ix.clear();
+        self.published_ix.clear();
         self.posts.clear();
     }
 
@@ -123,7 +123,7 @@ impl PostsStore {
         self.posts.values()
     }
 
-    pub fn iter_by_created(&self)
+    pub fn iter_by_published(&self)
     -> impl '_
         + Iterator<Item = &Arc<Post>>
         + DoubleEndedIterator
@@ -131,13 +131,13 @@ impl PostsStore {
         + FusedIterator
         + Clone
     {
-        // For each entry of the created index, look up the corresponding post in the posts map and
-        // return the post. Every entry in the created index should contain the ID of a post in the
-        // posts map, so the `expect` should never fail.
-        self.created_ix
+        // For each entry of the published index, look up the corresponding post in the posts map
+        // and return the post. Every entry in the published index should contain the ID of a post
+        // in the posts map, so the `expect` should never fail.
+        self.published_ix
             .iter()
             .map(|entry| self.get(&entry.id)
-                .expect("invalid entry in `created_ix` pointing to a post that does not exist"))
+                .expect("invalid entry in `published_ix` pointing to a post that does not exist"))
     }
 }
 
@@ -148,15 +148,15 @@ impl Default for PostsStore {
 }
 
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
-struct CreatedIxEntry {
-    created: DateTime<Utc>,
-    id: PostId,
+struct PublishedIxEntry {
+    published: DateTime<Utc>,
+    id: Id,
 }
 
-impl CreatedIxEntry {
+impl PublishedIxEntry {
     fn new(post: &Post) -> Self {
         Self {
-            created: post.created(),
+            published: post.published(),
             id: post.id().clone(),
         }
     }
