@@ -4,7 +4,7 @@ mod render;
 mod service;
 mod template;
 
-use std::{env, fs, path::PathBuf, sync::Arc, thread};
+use std::{env, fs, sync::Arc, thread};
 
 use axum::Server;
 use miette::{IntoDiagnostic, Context};
@@ -13,62 +13,10 @@ use tracing::info;
 use blog::{
     codeblock::CodeBlockRenderer,
     db::ConcurrentPostsStore,
-    uuid,
 };
 
+use config::Config;
 use render::Renderer;
-
-#[derive(knuffel::Decode, Clone, Debug)]
-pub struct Config {
-    #[knuffel(child, unwrap(argument))]
-    bind: String,
-    #[knuffel(child, unwrap(argument))]
-    concurrency_limit: usize,
-    #[knuffel(child, unwrap(argument))]
-    static_dir: PathBuf,
-    #[knuffel(child, unwrap(argument))]
-    favicon_dir: PathBuf,
-    #[knuffel(child, unwrap(argument))]
-    robots_path: PathBuf,
-    #[knuffel(child, unwrap(argument))]
-    posts_dir: PathBuf,
-    #[knuffel(child, unwrap(argument))]
-    post_media_dir: PathBuf,
-    #[knuffel(child, unwrap(argument))]
-    namespace_uuid: uuid::Uuid,
-    #[knuffel(child)]
-    self_ref: SelfRefConfig,
-    #[knuffel(child)]
-    rss: RssConfig,
-    #[knuffel(child)]
-    atom: AtomConfig,
-}
-
-#[derive(knuffel::Decode, Clone, Debug)]
-pub struct SelfRefConfig {
-    #[knuffel(child, unwrap(argument))]
-    protocol: String,
-    #[knuffel(child, unwrap(argument))]
-    domain: String,
-}
-
-#[derive(knuffel::Decode, Clone, Debug)]
-pub struct RssConfig {
-    #[knuffel(child, unwrap(argument))]
-    num_posts: usize,
-    #[knuffel(child, unwrap(argument))]
-    title: String,
-    #[knuffel(child, unwrap(argument))]
-    ttl: u32,
-}
-
-#[derive(knuffel::Decode, Clone, Debug)]
-pub struct AtomConfig {
-    #[knuffel(child, unwrap(argument))]
-    num_posts: usize,
-    #[knuffel(child, unwrap(argument))]
-    title: String,
-}
 
 fn main() -> miette::Result<()> {
     tracing_subscriber::fmt::init();
