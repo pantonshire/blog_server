@@ -9,6 +9,8 @@ use knuffel::{
     DecodeScalar,
 };
 
+//TODO: replace knuffel crate with kdl crate
+
 #[derive(knuffel::Decode, Clone, Debug)]
 pub struct Config {
     #[knuffel(child, unwrap(argument))]
