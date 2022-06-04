@@ -92,6 +92,6 @@ impl fmt::Display for Header {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         toml::to_string_pretty(self)
             .map_err(|_| fmt::Error)
-            .and_then(|s| f.write_str(&s))
+            .and_then(|s| f.write_str(s.trim()))
     }
 }
