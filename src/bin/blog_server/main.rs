@@ -4,10 +4,20 @@ mod render;
 mod service;
 mod template;
 
-use std::{env, fs, sync::Arc, thread};
+use std::{
+    env,
+    error,
+    fmt,
+    fs,
+    io,
+    net::SocketAddr,
+    path::PathBuf,
+    process,
+    sync::Arc,
+    thread,
+};
 
-use axum::Server;
-use miette::{IntoDiagnostic, Context};
+use hyper::Server;
 use tracing::info;
 
 use blog::{
@@ -18,23 +28,30 @@ use blog::{
 use config::Config;
 use render::Renderer;
 
-fn main() -> miette::Result<()> {
+fn main() {
+    if let Err(err) = run() {
+        eprintln!("***** Fatal error *****");
+        eprintln!("{}", err);
+        process::exit(1);
+    }
+}
+
+fn run() -> Result<(), Error> {
     tracing_subscriber::fmt::init();
 
-    // Load the configuration from the KDL config file specified by the first command-line
+    // Load the configuration from the TOML config file specified by the first command-line
     // argument.
     let config = Arc::new({
         let config_path = env::args().nth(1)
-            .ok_or_else(|| miette::Error::msg("No config file specified"))?;
+            .ok_or(Error::NoConfig)?;
 
         info!(path = %config_path, "Loading config");
 
         let contents = fs::read_to_string(&config_path)
-            .into_diagnostic()
-            .wrap_err_with(|| format!("Failed to read config file {}", config_path))?;
+            .map_err(Error::ReadConfig)?;
             
-        knuffel::parse::<Config>(&config_path, &contents)
-            .wrap_err_with(|| format!("Failed to parse config file {}", config_path))?
+        contents.parse::<Config>()
+            .map_err(Error::BadConfig)?
     });
 
     // Create the data structure used to store the rendered posts. This uses an `Arc` internally,
@@ -65,30 +82,67 @@ fn main() -> miette::Result<()> {
     tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()
-        .into_diagnostic()
-        .wrap_err("Failed to create async runtime")?
-        .block_on(run(config, posts_store))
+        .map_err(Error::TokioRuntime)?
+        .block_on(run_server(config, posts_store))
 }
 
-async fn run(
+async fn run_server(
     config: Arc<Config>,
     posts_store: ConcurrentPostsStore,
-) -> miette::Result<()>
+) -> Result<(), Error>
 {
-    let bind_address = &config.bind
-        .parse()
-        .into_diagnostic()
-        .wrap_err_with(|| format!("Failed to parse socket address \"{}\"", config.bind))?;
+    let service = service::site_service(config.clone(), posts_store);
 
-    let service = service::site_service(config, posts_store);
+    info!(address = %config.bind, "Starting server");
 
-    info!(address = %bind_address, "Starting server");
-
-    Server::try_bind(bind_address)
-        .into_diagnostic()
-        .wrap_err_with(|| format!("Failed to bind {}", bind_address))?
+    Server::try_bind(&config.bind)
+        .map_err(|err| Error::Bind(config.bind, err))?
         .serve(service.into_make_service())
         .await
-        .into_diagnostic()
-        .wrap_err("Fatal error while running the server")
+        .map_err(Error::Server)
 }
+
+#[derive(Debug)]
+enum Error {
+    NoConfig,
+    ReadConfig(io::Error),
+    BadConfig(toml::de::Error),
+    CreateWatcher(notify::Error),
+    WatchDir(PathBuf, notify::Error),
+    TokioRuntime(io::Error),
+    Bind(SocketAddr, hyper::Error),
+    Server(hyper::Error),
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::NoConfig => {
+                write!(f, "no config file specified")
+            },
+            Self::ReadConfig(err) => {
+                write!(f, "failed to read config file: {}", err)
+            },
+            Self::BadConfig(err) => {
+                write!(f, "error in config: {}", err)
+            },
+            Self::CreateWatcher(err) => {
+                write!(f, "failed to create filesystem watcher: {}", err)
+            },
+            Self::WatchDir(path, err) => {
+                write!(f, "failed to watch directory {}: {}", path.to_string_lossy(), err)
+            },
+            Self::TokioRuntime(err) => {
+                write!(f, "failed to create async runtime: {}", err)
+            },
+            Self::Bind(addr, err) => {
+                write!(f, "failed to bind {}: {}", addr, err)
+            },
+            Self::Server(err) => {
+                write!(f, "error while running server: {}", err)
+            },
+        }
+    }
+}
+
+impl error::Error for Error {}

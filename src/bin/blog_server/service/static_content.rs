@@ -18,7 +18,7 @@ use tracing::{info, error};
 
 use super::response::Error;
 
-pub fn file_service(file_path: &Path, mime: Option<&Mime>) -> MethodRouter<Body, Infallible> {
+pub(super) fn file_service(file_path: &Path, mime: Option<&Mime>) -> MethodRouter<Body, Infallible> {
     let serve_file = match mime {
         Some(mime) => ServeFile::new_with_mime(file_path, mime),
         None => ServeFile::new(file_path),
@@ -28,7 +28,7 @@ pub fn file_service(file_path: &Path, mime: Option<&Mime>) -> MethodRouter<Body,
         .handle_error(handle_error)
 }
 
-pub fn dir_service(dir_path: &Path) -> MethodRouter<Body, Infallible> {
+pub(super) fn dir_service(dir_path: &Path) -> MethodRouter<Body, Infallible> {
     let fallback_service = handle_fallback
         .into_service()
         .map_err(Empty::elim::<io::Error>);
@@ -40,12 +40,12 @@ pub fn dir_service(dir_path: &Path) -> MethodRouter<Body, Infallible> {
         .handle_error(handle_error)
 }
 
-pub async fn handle_fallback(uri: Uri) -> Error {
+pub(super) async fn handle_fallback(uri: Uri) -> Error {
     info!(path = %uri.path(), "Requested static file not found");
     Error::StaticResourceNotFound
 }
 
-pub async fn handle_error(uri: Uri, err: io::Error) -> Error {
+pub(super) async fn handle_error(uri: Uri, err: io::Error) -> Error {
     error!(path = %uri.path(), err = %err, "IO error");
     Error::Internal
 }

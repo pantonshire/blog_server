@@ -7,7 +7,7 @@ use crate::template;
 
 use super::response::{Error, Html};
 
-pub async fn handle(
+pub(super) async fn handle(
     Path(post_id): Path<String>,
     Extension(posts): Extension<ConcurrentPostsStore>
 ) -> Result<Html, Error>

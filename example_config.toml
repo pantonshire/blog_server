@@ -1,0 +1,23 @@
+bind = "127.0.0.1:8080"
+concurrency_limit = 128
+
+static_dir     = "./content/static/"
+favicon_dir    = "./content/favicon/"
+robots_path    = "./content/robots.txt"
+posts_dir      = "./articles/src/"
+post_media_dir = "./articles/media/"
+
+namespace_uuid = "00000000-0000-0000-0000-000000000000"
+
+[self_ref]
+protocol = "http"
+domain   = "localhost:8080"
+
+[rss]
+num_posts = 20
+title     = "Pantonshire"
+ttl       = 360
+
+[atom]
+num_posts = 20
+title     = "Pantonshire"

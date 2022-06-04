@@ -14,7 +14,7 @@ use crate::Config;
 
 use super::response::Rss;
 
-pub async fn handle(
+pub(super) async fn handle(
     Extension(config): Extension<Arc<Config>>,
     Extension(posts): Extension<ConcurrentPostsStore>,
 ) -> Rss<Bytes> {

@@ -18,7 +18,7 @@ use blog::{
 
 use crate::Config;
 
-pub struct Renderer {
+pub(crate) struct Renderer {
     config: Arc<Config>,
     posts: ConcurrentPostsStore,
     code_renderer: CodeBlockRenderer,
@@ -27,7 +27,7 @@ pub struct Renderer {
 }
 
 impl Renderer {
-    pub fn new(
+    pub(crate) fn new(
         config: Arc<Config>,
         posts: ConcurrentPostsStore,
         code_renderer: CodeBlockRenderer,
@@ -51,7 +51,7 @@ impl Renderer {
     }
 
     #[tracing::instrument(skip(self))]
-    pub fn handle_events(self) {
+    pub(crate) fn handle_events(self) {
         while let Ok(notify_event) = self.rx.recv() {
             let fs_event = match notify_event {
                 // Convert create & write events for valid post file names to update events.
@@ -204,7 +204,7 @@ impl Renderer {
     
         Post::new_from_str(
             &self.code_renderer,
-            *self.config.namespace_uuid,
+            self.config.namespace_uuid,
             target.id.clone(),
             updated,
             &contents
@@ -221,8 +221,8 @@ enum Event {
 }
 
 struct EventTarget {
-    pub path: PathBuf,
-    pub id: Id,
+    path: PathBuf,
+    id: Id,
 }
 
 impl fmt::Debug for EventTarget {
@@ -232,7 +232,7 @@ impl fmt::Debug for EventTarget {
 }
 
 impl EventTarget {
-    pub fn from_path(path: PathBuf) -> Option<Self> {
+    fn from_path(path: PathBuf) -> Option<Self> {
         path.file_name()
             .and_then(|file_name| file_name.to_str())
             .and_then(Id::from_file_name)
@@ -243,7 +243,7 @@ impl EventTarget {
     }
 }
 
-pub enum Error {
+pub(crate) enum Error {
     Io(Box<io::Error>),
     NotAFile,
     Parsing(Box<ParseError>),

@@ -1,27 +1,25 @@
 use std::{fmt, str};
 
-use kdl::KdlDocument;
-
-use super::error::Error;
+use super::{error::Error, header::Header};
 
 const DELIM: &str = "\n---\n";
 
 #[derive(Clone, Debug)]
 pub struct PostSource {
-    pub(super) header: KdlDocument,
+    pub(super) header: Header,
     pub(super) markdown: String,
 }
 
 impl PostSource {
     #[inline]
     #[must_use]
-    pub fn header(&self) -> &KdlDocument {
+    pub fn header(&self) -> &Header {
         &self.header
     }
 
     #[inline]
     #[must_use]
-    pub fn header_mut(&mut self) -> &mut KdlDocument {
+    pub fn header_mut(&mut self) -> &mut Header {
         &mut self.header
     }
 
@@ -53,7 +51,7 @@ impl str::FromStr for PostSource {
 }
 
 impl fmt::Display for PostSource {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {  
         write!(f, "{}{}{}", self.header, DELIM, self.markdown)
     }
 }

@@ -4,7 +4,7 @@ use crate::template;
 
 use super::response::Html;
 
-pub async fn handle() -> Html {
+pub(super) async fn handle() -> Html {
     Html::new()
         .with_title_static("Contact")
         .with_crawler_permissive()

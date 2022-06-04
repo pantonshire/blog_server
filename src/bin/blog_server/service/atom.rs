@@ -9,7 +9,7 @@ use crate::Config;
 
 use super::response::Atom;
 
-pub async fn handle(
+pub(super) async fn handle(
     Extension(config): Extension<Arc<Config>>,
     Extension(posts): Extension<ConcurrentPostsStore>,
 ) -> Atom<Bytes> {
@@ -50,7 +50,7 @@ pub async fn handle(
 
     Atom(
         atom::FeedBuilder::default()
-            .id(format!("urn:uuid:{}", *config.namespace_uuid))
+            .id(format!("urn:uuid:{}", config.namespace_uuid))
             .title(config.atom.title.clone())
             .updated(updated)
             .links(vec![

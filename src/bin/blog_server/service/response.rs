@@ -11,7 +11,7 @@ use axum::{
 use maud::{html, Markup, Render, Escaper, DOCTYPE};
 
 #[derive(Debug)]
-pub enum Error {
+pub(super) enum Error {
     Internal,
     PostNotFound,
     StaticResourceNotFound,
@@ -62,7 +62,7 @@ impl IntoResponse for Error {
     }
 }
 
-pub struct Html {
+pub(super) struct Html {
     status: StatusCode,
     title: Cow<'static, str>,
     head: Option<Markup>,
@@ -71,7 +71,7 @@ pub struct Html {
 }
 
 impl Html {
-    pub fn new() -> Self {
+    pub(super) fn new() -> Self {
         Self {
             status: StatusCode::OK,
             title: Cow::Borrowed("untitled"),
@@ -81,39 +81,39 @@ impl Html {
         }
     }
 
-    pub fn with_status(self, status: StatusCode) -> Self {
+    pub(super) fn with_status(self, status: StatusCode) -> Self {
         Self { status, ..self }
     }
 
-    pub fn with_title(self, title: Cow<'static, str>) -> Self {
+    pub(super) fn with_title(self, title: Cow<'static, str>) -> Self {
         Self { title, ..self }
     }
 
-    pub fn with_title_static(self, title: &'static str) -> Self {
+    pub(super) fn with_title_static(self, title: &'static str) -> Self {
         self.with_title(Cow::Borrowed(title))
     }
 
-    pub fn with_title_owned(self, title: String) -> Self {
+    pub(super) fn with_title_owned(self, title: String) -> Self {
         self.with_title(Cow::Owned(title))
     }
 
-    pub fn with_head(self, head: Markup) -> Self {
+    pub(super) fn with_head(self, head: Markup) -> Self {
         Self { head: Some(head), ..self }
     }
 
-    pub fn with_body(self, body: Markup) -> Self {
+    pub(super) fn with_body(self, body: Markup) -> Self {
         Self { body: Some(body), ..self }
     }
 
-    pub fn with_crawler_hints(self, crawler_hints: CrawlerHints) -> Self {
+    pub(super) fn with_crawler_hints(self, crawler_hints: CrawlerHints) -> Self {
         Self { crawler_hints, ..self }
     }
 
-    pub fn with_crawler_restrictive(self) -> Self {
+    pub(super) fn with_crawler_restrictive(self) -> Self {
         self.with_crawler_hints(CrawlerHints::restrictive())
     }
 
-    pub fn with_crawler_permissive(self) -> Self {
+    pub(super) fn with_crawler_permissive(self) -> Self {
         self.with_crawler_hints(CrawlerHints::permissive())
     }
 }
@@ -160,7 +160,7 @@ impl IntoResponse for Html {
 }
 
 #[derive(Clone, Copy, Debug)]
-pub struct CrawlerHints {
+pub(super) struct CrawlerHints {
     index: bool,
     follow: bool,
     archive: bool,
@@ -169,7 +169,7 @@ pub struct CrawlerHints {
 }
 
 impl CrawlerHints {
-    pub const fn restrictive() -> Self {
+    pub(super) const fn restrictive() -> Self {
         Self {
             index: false,
             follow: false,
@@ -179,7 +179,7 @@ impl CrawlerHints {
         }
     }
 
-    pub const fn permissive() -> Self {
+    pub(super) const fn permissive() -> Self {
         Self {
             index: true,
             follow: true,
@@ -189,23 +189,23 @@ impl CrawlerHints {
         }
     }
 
-    pub const fn with_index(self, index: bool) -> Self {
+    pub(super) const fn with_index(self, index: bool) -> Self {
         Self { index, ..self }
     }
 
-    pub const fn with_follow(self, follow: bool) -> Self {
+    pub(super) const fn with_follow(self, follow: bool) -> Self {
         Self { follow, ..self }
     }
 
-    pub const fn with_archive(self, archive: bool) -> Self {
+    pub(super) const fn with_archive(self, archive: bool) -> Self {
         Self { archive, ..self }
     }
 
-    pub const fn with_snippet(self, snippet: bool) -> Self {
+    pub(super) const fn with_snippet(self, snippet: bool) -> Self {
         Self { snippet, ..self }
     }
 
-    pub const fn with_image_index(self, image_index: bool) -> Self {
+    pub(super) const fn with_image_index(self, image_index: bool) -> Self {
         Self { image_index, ..self }
     }
 
@@ -271,7 +271,7 @@ impl Render for CrawlerHints {
     }
 }
 
-pub struct Rss<T>(pub T);
+pub(super) struct Rss<T>(pub T);
 
 impl<T: Into<Full<Bytes>>> IntoResponse for Rss<T> {
     fn into_response(self) -> Response {
@@ -284,7 +284,7 @@ impl<T: Into<Full<Bytes>>> IntoResponse for Rss<T> {
     }
 }
 
-pub struct Atom<T>(pub T);
+pub(super) struct Atom<T>(pub T);
 
 impl<T: Into<Full<Bytes>>> IntoResponse for Atom<T> {
     fn into_response(self) -> Response {

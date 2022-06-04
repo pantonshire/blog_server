@@ -4,7 +4,6 @@ use std::{
     time::Duration,
 };
 
-use miette::{IntoDiagnostic, WrapErr};
 use notify::{
     DebouncedEvent,
     RecommendedWatcher,
@@ -14,20 +13,20 @@ use notify::{
 };
 use tracing::info;
 
-pub fn start_watching(
+use crate::Error;
+
+pub(crate) fn start_watching(
     tx: mpsc::Sender<DebouncedEvent>,
     watch_path: &Path
-) -> miette::Result<RecommendedWatcher>
+) -> Result<RecommendedWatcher, Error>
 {
     let mut watcher = watcher(tx, Duration::from_secs(2))
-        .into_diagnostic()
-        .wrap_err("Failed to create filesystem watcher")?;
+        .map_err(Error::CreateWatcher)?;
 
     // Watch the path in non-recursive mode, so events are not generated for nodes in
     // sub-directories.
     watcher.watch(watch_path, RecursiveMode::NonRecursive)
-        .into_diagnostic()
-        .wrap_err_with(|| format!("Failed to watch directory {}", watch_path.to_string_lossy()))?;
+        .map_err(|err| Error::WatchDir(watch_path.to_owned(), err))?;
 
     info!(path = %watch_path.to_string_lossy(), "Watching directory");
 

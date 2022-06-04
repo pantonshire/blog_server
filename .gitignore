@@ -1,6 +1,6 @@
 .DS_Store
 /target/
-/config.kdl
+/config.toml
 /content/static/fonts/
 /article_media/
 /test_posts/

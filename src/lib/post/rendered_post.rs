@@ -8,9 +8,8 @@ use super::{
     error::Error,
     header::Header,
     id::Id,
-    markdown_post::MarkdownPost,
-    render::render_markdown,
     source::PostSource,
+    render::render_markdown,
 };
 
 pub struct RenderedPost {
@@ -30,19 +29,16 @@ impl RenderedPost {
         source: &str
     ) -> Result<Self, Error>
     {
-        let markdown_post = source
-            .parse::<PostSource>()
-            .and_then(MarkdownPost::try_from)?;
-
-        Self::new_from_markdown_post(code_renderer, namespace, id, updated, markdown_post)
+        let source = source.parse::<PostSource>()?;
+        Self::new_from_source(code_renderer, namespace, id, updated, source)
     }
 
-    pub fn new_from_markdown_post(
+    pub fn new_from_source(
         code_renderer: &CodeBlockRenderer,
         namespace: Uuid,
         id: Id,
         updated: Option<DateTime<Utc>>,
-        markdown_post: MarkdownPost
+        source: PostSource
     ) -> Result<Self, Error>
     {
         let uuid = Uuid::new_v5(namespace, &*id)
@@ -53,9 +49,9 @@ impl RenderedPost {
         Ok(Self {
             uuid,
             id,
-            header: markdown_post.header,
+            header: source.header,
             updated: updated.unwrap_or_else(unix_epoch),
-            html: render_markdown(code_renderer, &markdown_post.markdown), 
+            html: render_markdown(code_renderer, &source.markdown), 
         })
     }
 

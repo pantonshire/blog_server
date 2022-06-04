@@ -1,6 +1,6 @@
 use maud::{html, Markup};
 
-pub fn main_page(content: Markup) -> Markup {
+pub(crate) fn main_page(content: Markup) -> Markup {
     html! {
         header #page_header {
             nav #page_nav {

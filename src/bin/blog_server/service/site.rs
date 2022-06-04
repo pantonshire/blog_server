@@ -26,7 +26,7 @@ use super::{
     static_content,
 };
 
-pub fn service(
+pub(crate) fn service(
     config: Arc<Config>,
     posts_store: ConcurrentPostsStore,
 ) -> Router
@@ -55,7 +55,7 @@ pub fn service(
         .layer(Extension(posts_store))
 }
 
-pub async fn handle_fallback(uri: Uri) -> Error {
+async fn handle_fallback(uri: Uri) -> Error {
     info!(path = %uri.path(), "Requested resource not found");
     Error::RouteNotFound
 }

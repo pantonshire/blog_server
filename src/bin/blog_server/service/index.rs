@@ -7,7 +7,7 @@ use crate::template;
 
 use super::response::Html;
 
-pub async fn handle(Extension(posts): Extension<ConcurrentPostsStore>) -> Html {
+pub(super) async fn handle(Extension(posts): Extension<ConcurrentPostsStore>) -> Html {
     Html::new()
         .with_title_static("Pantonshire")
         .with_crawler_permissive()
