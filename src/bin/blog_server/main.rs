@@ -8,6 +8,7 @@ use std::{
     env,
     error,
     fmt,
+    future,
     fs,
     io,
     net::SocketAddr,
@@ -18,7 +19,8 @@ use std::{
 };
 
 use hyper::Server;
-use tracing::info;
+use tokio::signal;
+use tracing::{error, info};
 
 use blog::{
     codeblock::CodeBlockRenderer,
@@ -69,9 +71,9 @@ fn run() -> Result<(), Error> {
     );
 
     // Dropping the watcher stops its thread, so keep it alive until `main` returns.
-    let _watcher = fs_watcher::start_watching(tx, &config.posts_dir)?;
+    let watcher = fs_watcher::start_watching(tx, &config.posts_dir)?;
 
-    thread::spawn(move || {
+    let renderer_handle = thread::spawn(move || {
         renderer.handle_events();
     });
 
@@ -83,7 +85,21 @@ fn run() -> Result<(), Error> {
         .enable_all()
         .build()
         .map_err(Error::TokioRuntime)?
-        .block_on(run_server(config, posts_store))
+        .block_on(run_server(config, posts_store))?;
+
+    info!("Stopped server");
+
+    info!("Stopping filesystem watcher");
+    drop(watcher);
+
+    info!("Waiting for renderer thread to exit");
+    if renderer_handle.join().is_err() {
+        error!("Renderer thread panicked!");
+    }
+
+    info!("Goodbye!");
+
+    Ok(())
 }
 
 async fn run_server(
@@ -98,8 +114,46 @@ async fn run_server(
     Server::try_bind(&config.bind)
         .map_err(|err| Error::Bind(config.bind, err))?
         .serve(service.into_make_service())
+        .with_graceful_shutdown(handle_interrupt())
         .await
         .map_err(Error::Server)
+}
+
+async fn handle_interrupt() {
+    info!("Installing interrupt handler");
+    
+    let sigint = async {
+        signal::ctrl_c()
+            .await
+            .unwrap()
+    };
+
+    #[cfg(unix)] {
+        use signal::unix::{signal, SignalKind};
+
+        let sigterm = async {
+            signal(SignalKind::terminate())
+                .unwrap()
+                .recv()
+                .await;
+        };
+
+        tokio::select! {
+            biased;
+            _ = sigterm => {
+                info!("Received SIGTERM");
+            },
+            _ = sigint => {
+                info!("Received SIGINT");
+            },
+        };
+    }
+
+    #[cfg(not(unix))] {
+        sigint.await;
+    }
+
+    info!("Shutdown signal received, stopping");
 }
 
 #[derive(Debug)]
