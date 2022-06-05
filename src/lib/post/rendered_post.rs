@@ -16,7 +16,7 @@ pub struct RenderedPost {
     uuid: Uuid,
     id: Id,
     header: Header,
-    updated: DateTime<Utc>,
+    updated: Option<DateTime<Utc>>,
     html: Markup,
 }
 
@@ -50,7 +50,7 @@ impl RenderedPost {
             uuid,
             id,
             header: source.header,
-            updated: updated.unwrap_or_else(unix_epoch),
+            updated,
             html: render_markdown(code_renderer, &source.markdown), 
         })
     }
@@ -101,12 +101,14 @@ impl RenderedPost {
     #[must_use]
     pub fn published(&self) -> DateTime<Utc> {
         self.header.published()
+            .unwrap_or_else(unix_epoch)
     }
 
     #[inline]
     #[must_use]
     pub fn updated(&self) -> DateTime<Utc> {
         self.updated
+            .unwrap_or_else(unix_epoch)
     }
 
     #[inline]

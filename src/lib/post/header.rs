@@ -13,8 +13,7 @@ pub struct Header {
     pub(super) author: ShString22,
     #[serde(default)]
     pub(super) tags: Vec<ShString22>,
-    #[serde(default = "crate::time::unix_epoch")]
-    pub(super) published: DateTime<Utc>,
+    pub(super) published: Option<DateTime<Utc>>,
 }
 
 impl Header {
@@ -68,13 +67,13 @@ impl Header {
 
     #[inline]
     #[must_use]
-    pub fn published(&self) -> DateTime<Utc> {
+    pub fn published(&self) -> Option<DateTime<Utc>> {
         self.published
     }
 
     #[inline]
     #[must_use]
-    pub fn published_mut(&mut self) -> &mut DateTime<Utc> {
+    pub fn published_mut(&mut self) -> &mut Option<DateTime<Utc>> {
         &mut self.published
     }
 }

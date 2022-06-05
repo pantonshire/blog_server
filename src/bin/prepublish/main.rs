@@ -29,7 +29,9 @@ fn main() {
             },
         };
 
-        *source.header_mut().published_mut() = Utc::now();
+        if source.header().published().is_none() {
+            *source.header_mut().published_mut() = Some(Utc::now());
+        }
 
         if let Err(err) = fs::write(&path, source.to_string()) {
             eprintln!("failed to write {}: {}", path.to_string_lossy(), err);
