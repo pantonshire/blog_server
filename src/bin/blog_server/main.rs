@@ -8,7 +8,6 @@ use std::{
     env,
     error,
     fmt,
-    future,
     fs,
     io,
     net::SocketAddr,
