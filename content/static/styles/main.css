@@ -354,6 +354,12 @@ ul.articles_list {
     box-shadow: 3px 3px 10px #C9C9C9;
 }
 
+.article_content h1,
+.article_content h2,
+.article_content h3 {
+    margin-top: 2rem;
+}
+
 @media screen and (min-width: 22em) {
     #page_nav #title_box {
         font-size: 2rem;
