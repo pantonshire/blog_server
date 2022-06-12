@@ -1,7 +1,7 @@
-use std::{net::SocketAddr, path::PathBuf, str};
+use std::{time::Duration, net::SocketAddr, path::PathBuf, str};
 
 use libshire::uuid::Uuid;
-use serde::Deserialize;
+use serde::{Deserialize, Deserializer};
 
 #[derive(Deserialize, Clone, Debug)]
 pub(crate) struct Config {
@@ -12,6 +12,8 @@ pub(crate) struct Config {
     pub robots_path: PathBuf,
     pub posts_dir: PathBuf,
     pub post_media_dir: PathBuf,
+    #[serde(rename = "fs_event_delay_millis", deserialize_with = "deserialize_millis")]
+    pub fs_event_delay: Duration,
     pub namespace_uuid: Uuid,
     pub self_ref: SelfRefConfig,
     pub rss: RssConfig,
@@ -43,4 +45,12 @@ impl str::FromStr for Config {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         toml::from_str(s)
     }
+}
+
+fn deserialize_millis<'de, D>(deserializer: D) -> Result<Duration, D::Error>
+where
+    D: Deserializer<'de>
+{
+    u64::deserialize(deserializer)
+        .map(Duration::from_millis)
 }

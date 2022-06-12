@@ -69,8 +69,12 @@ fn run() -> Result<(), Error> {
         config.posts_dir.clone()
     );
 
-    // Dropping the watcher stops its thread, so keep it alive until `main` returns.
-    let watcher = fs_watcher::start_watching(tx, &config.posts_dir)?;
+    // Dropping the watcher stops its thread, so keep it alive until the server has stopped.
+    let watcher = fs_watcher::start_watching(
+        tx,
+        &config.posts_dir,
+        config.fs_event_delay
+    )?;
 
     let renderer_handle = thread::spawn(move || {
         renderer.handle_events();

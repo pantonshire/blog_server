@@ -17,10 +17,11 @@ use crate::Error;
 
 pub(crate) fn start_watching(
     tx: mpsc::Sender<DebouncedEvent>,
-    watch_path: &Path
+    watch_path: &Path,
+    delay: Duration
 ) -> Result<RecommendedWatcher, Error>
 {
-    let mut watcher = watcher(tx, Duration::from_secs(2))
+    let mut watcher = watcher(tx, delay)
         .map_err(Error::CreateWatcher)?;
 
     // Watch the path in non-recursive mode, so events are not generated for nodes in
