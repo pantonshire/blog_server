@@ -7,6 +7,8 @@ robots_path    = "./content/robots.txt"
 posts_dir      = "./articles/src/"
 post_media_dir = "./articles/media/"
 
+fs_event_delay_millis = 2000
+
 namespace_uuid = "00000000-0000-0000-0000-000000000000"
 
 [self_ref]
