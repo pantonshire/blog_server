@@ -109,10 +109,6 @@ impl Html {
         Self { crawler_hints, ..self }
     }
 
-    pub(super) fn with_crawler_restrictive(self) -> Self {
-        self.with_crawler_hints(CrawlerHints::restrictive())
-    }
-
     pub(super) fn with_crawler_permissive(self) -> Self {
         self.with_crawler_hints(CrawlerHints::permissive())
     }
@@ -187,26 +183,6 @@ impl CrawlerHints {
             snippet: true,
             image_index: true,
         }
-    }
-
-    pub(super) const fn with_index(self, index: bool) -> Self {
-        Self { index, ..self }
-    }
-
-    pub(super) const fn with_follow(self, follow: bool) -> Self {
-        Self { follow, ..self }
-    }
-
-    pub(super) const fn with_archive(self, archive: bool) -> Self {
-        Self { archive, ..self }
-    }
-
-    pub(super) const fn with_snippet(self, snippet: bool) -> Self {
-        Self { snippet, ..self }
-    }
-
-    pub(super) const fn with_image_index(self, image_index: bool) -> Self {
-        Self { image_index, ..self }
     }
 
     fn index_str(self) -> &'static str {
