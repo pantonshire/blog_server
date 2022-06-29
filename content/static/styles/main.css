@@ -134,6 +134,10 @@ li {
     margin-bottom: 0.5rem;
 }
 
+strong {
+    font-weight: 700;
+}
+
 #page_header {
     background-color: #94BFBE;
     color: white;
