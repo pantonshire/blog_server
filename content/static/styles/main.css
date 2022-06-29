@@ -360,6 +360,19 @@ ul.articles_list {
     margin-top: 2rem;
 }
 
+.article_content blockquote {
+    font-style: italic;
+    font-weight: 700;
+    border-left: 5px solid #C9C9C9;
+    padding-left: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.article_content blockquote p {
+    margin: 0;
+}
+
 @media screen and (min-width: 22em) {
     #page_nav #title_box {
         font-size: 2rem;
