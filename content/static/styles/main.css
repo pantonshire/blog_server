@@ -396,10 +396,15 @@ ul.articles_list {
         display: flex;
         flex-direction: row;
         justify-content: space-between;
+        padding: 1rem 2rem;
     }
     
     #page_nav #title_box {
         margin-bottom: 0;
+    }
+
+    #page_footer_content {
+        padding: 1rem 2rem;
     }
 
     #page_footer_content ul {
@@ -411,7 +416,7 @@ ul.articles_list {
     }
 
     #content {
-        padding: 2rem 1rem 4rem 1rem;
+        padding: 2rem 2rem 4rem 2rem;
     }
 
     .article_title {
