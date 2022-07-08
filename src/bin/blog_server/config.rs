@@ -7,23 +7,34 @@ use serde::{Deserialize, Deserializer};
 pub(crate) struct Config {
     pub bind: SocketAddr,
     pub concurrency_limit: usize,
-    pub static_dir: PathBuf,
-    pub favicon_dir: PathBuf,
-    pub robots_path: PathBuf,
-    pub posts_dir: PathBuf,
-    pub post_media_dir: PathBuf,
     #[serde(rename = "fs_event_delay_millis", deserialize_with = "deserialize_millis")]
     pub fs_event_delay: Duration,
     pub namespace_uuid: Uuid,
-    pub self_ref: SelfRefConfig,
+    pub content: ContentConfig,
+    pub github: GithubConfig,
+    pub site: SiteConfig,
     pub rss: RssConfig,
     pub atom: AtomConfig,
 }
 
 #[derive(Deserialize, Clone, Debug)]
-pub(crate) struct SelfRefConfig {
+pub(crate) struct SiteConfig {
     pub protocol: String,
     pub domain: String,
+}
+
+#[derive(Deserialize, Clone, Debug)]
+pub(crate) struct ContentConfig {
+    pub static_dir: PathBuf,
+    pub favicon_dir: PathBuf,
+    pub robots_path: PathBuf,
+    pub posts_dir: PathBuf,
+    pub post_media_dir: PathBuf,
+}
+
+#[derive(Deserialize, Clone, Debug)]
+pub(crate) struct GithubConfig {
+    pub source_url: Option<String>,
 }
 
 #[derive(Deserialize, Clone, Debug)]

@@ -10,14 +10,13 @@ use tokio::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 use crate::post::{Post, Id};
 
-#[derive(Clone)]
 pub struct ConcurrentPostsStore {
-    inner: Arc<RwLock<PostsStore>>,
+    inner: RwLock<PostsStore>,
 }
 
 impl ConcurrentPostsStore {
     pub fn new() -> Self {
-        Self { inner: Arc::new(RwLock::new(PostsStore::new())) }
+        Self { inner: RwLock::new(PostsStore::new()) }
     }
 
     pub async fn read(&self) -> RwLockReadGuard<'_, PostsStore> {

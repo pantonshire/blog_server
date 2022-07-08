@@ -1,13 +1,13 @@
+use std::sync::Arc;
+
 use axum::extract::Extension;
 use maud::html;
 
-use blog::db::ConcurrentPostsStore;
-
-use crate::template;
+use crate::{Context, template};
 
 use super::response::Html;
 
-pub(super) async fn handle(Extension(posts): Extension<ConcurrentPostsStore>) -> Html {
+pub(super) async fn handle(Extension(context): Extension<Arc<Context>>) -> Html {
     Html::new()
         .with_title_static("Pantonshire")
         .with_crawler_permissive()
@@ -49,7 +49,7 @@ pub(super) async fn handle(Extension(posts): Extension<ConcurrentPostsStore>) ->
                 h2 { "Articles" }
                 p { "Some recent ones:" }
                 ul .articles_list {
-                    @for post in posts.read().await.iter_by_published().rev().take(3) {
+                    @for post in context.posts().read().await.iter_by_published().rev().take(3) {
                         li {
                             h3 { a href={"/articles/" (post.id())} { (post.title()) } }
                             @if let Some(subtitle) = post.subtitle() {

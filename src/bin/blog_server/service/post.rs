@@ -1,18 +1,18 @@
+use std::sync::Arc;
+
 use axum::extract::{Extension, Path};
 use maud::html;
 
-use blog::db::ConcurrentPostsStore;
-
-use crate::template;
+use crate::{Context, template};
 
 use super::response::{Error, Html};
 
 pub(super) async fn handle(
     Path(post_id): Path<String>,
-    Extension(posts): Extension<ConcurrentPostsStore>
+    Extension(context): Extension<Arc<Context>>,
 ) -> Result<Html, Error>
 {
-    let post = posts.get(&post_id)
+    let post = context.posts().get(&post_id)
         .await
         .ok_or(Error::PostNotFound)?;
 

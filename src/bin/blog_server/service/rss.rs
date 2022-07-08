@@ -5,24 +5,18 @@ use axum::{
     extract::Extension,
 };
 
-use blog::{
-    db::ConcurrentPostsStore,
-    time::unix_epoch,
-};
+use blog::time::unix_epoch;
 
-use crate::Config;
+use crate::Context;
 
 use super::response::Rss;
 
-pub(super) async fn handle(
-    Extension(config): Extension<Arc<Config>>,
-    Extension(posts): Extension<ConcurrentPostsStore>,
-) -> Rss<Bytes> {
+pub(super) async fn handle(Extension(context): Extension<Arc<Context>>) -> Rss<Bytes> {
     let (rss_items, updated) = {
-        let guard = posts.read().await;
+        let guard = context.posts().read().await;
 
         let rss_items = guard.iter_by_published()
-            .take(config.rss.num_posts)
+            .take(context.config().rss.num_posts)
             .map(|post| {
                 rss::ItemBuilder::default()
                     .title(Some(post.title().to_owned()))
@@ -32,8 +26,8 @@ pub(super) async fn handle(
                         .build()))
                     .link(Some(format!(
                         "{}://{}/articles/{}",
-                        config.self_ref.protocol,
-                        config.self_ref.domain,
+                        context.config().site.protocol,
+                        context.config().site.domain,
                         post.id()
                     )))
                     .pub_date(Some(post.published().to_rfc2822()))
@@ -48,12 +42,12 @@ pub(super) async fn handle(
     };
 
     Rss(rss::ChannelBuilder::default()
-        .title(config.rss.title.clone())
+        .title(context.config().rss.title.clone())
         .link(format!(
             "{}://{}",
-            config.self_ref.protocol, config.self_ref.domain
+            context.config().site.protocol, context.config().site.domain
         ))
-        .ttl(Some(config.rss.ttl.to_string()))
+        .ttl(Some(context.config().rss.ttl.to_string()))
         .last_build_date(Some(updated.to_rfc2822()))
         .items(rss_items)
         .build()

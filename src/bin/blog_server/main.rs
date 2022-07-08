@@ -1,4 +1,5 @@
 mod config;
+mod context;
 mod fs_watcher;
 mod render;
 mod service;
@@ -27,6 +28,7 @@ use blog::{
 };
 
 use config::Config;
+use context::Context;
 use render::Renderer;
 
 fn main() {
@@ -42,7 +44,7 @@ fn run() -> Result<(), Error> {
 
     // Load the configuration from the TOML config file specified by the first command-line
     // argument.
-    let config = Arc::new({
+    let config = {
         let config_path = env::args().nth(1)
             .ok_or(Error::NoConfig)?;
 
@@ -53,27 +55,25 @@ fn run() -> Result<(), Error> {
             
         contents.parse::<Config>()
             .map_err(Error::BadConfig)?
-    });
+    };
 
-    // Create the data structure used to store the rendered posts. This uses an `Arc` internally,
-    // so clones will point to the same underlying data.
-    let posts_store = ConcurrentPostsStore::new();
+    // Create the global context that will be used and modified throughout the program.
+    let context = Arc::new(Context::new(config, ConcurrentPostsStore::new()));
 
     let code_renderer = CodeBlockRenderer::new();
 
     // Create the post renderer and the mpsc channel that will be used to communicate with it.
     let (renderer, tx) = Renderer::new(
-        config.clone(),
-        posts_store.clone(),
+        context.clone(),
         code_renderer,
-        config.posts_dir.clone()
+        context.config().content.posts_dir.clone()
     );
 
     // Dropping the watcher stops its thread, so keep it alive until the server has stopped.
     let watcher = fs_watcher::start_watching(
         tx,
-        &config.posts_dir,
-        config.fs_event_delay
+        &context.config().content.posts_dir,
+        context.config().fs_event_delay
     )?;
 
     let renderer_handle = thread::spawn(move || {
@@ -88,7 +88,7 @@ fn run() -> Result<(), Error> {
         .enable_all()
         .build()
         .map_err(Error::TokioRuntime)?
-        .block_on(run_server(config, posts_store))?;
+        .block_on(run_server(context))?;
 
     info!("Stopped server");
 
@@ -105,17 +105,13 @@ fn run() -> Result<(), Error> {
     Ok(())
 }
 
-async fn run_server(
-    config: Arc<Config>,
-    posts_store: ConcurrentPostsStore,
-) -> Result<(), Error>
-{
-    let service = service::site_service(config.clone(), posts_store);
+async fn run_server(context: Arc<Context>) -> Result<(), Error> {
+    let service = service::site_service(context.clone());
 
-    info!(address = %config.bind, "Starting server");
+    info!(address = %context.config().bind, "Starting server");
 
-    Server::try_bind(&config.bind)
-        .map_err(|err| Error::Bind(config.bind, err))?
+    Server::try_bind(&context.config().bind)
+        .map_err(|err| Error::Bind(context.config().bind, err))?
         .serve(service.into_make_service())
         .with_graceful_shutdown(handle_interrupt())
         .await

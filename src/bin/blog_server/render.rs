@@ -13,14 +13,12 @@ use tracing::{info, warn, error};
 use blog::{
     codeblock::CodeBlockRenderer,
     post::{Error as ParseError, Post, Id},
-    db::ConcurrentPostsStore,
 };
 
-use crate::Config;
+use crate::Context;
 
 pub(crate) struct Renderer {
-    config: Arc<Config>,
-    posts: ConcurrentPostsStore,
+    context: Arc<Context>,
     code_renderer: CodeBlockRenderer,
     posts_dir_path: PathBuf,
     rx: mpsc::Receiver<DebouncedEvent>,
@@ -28,8 +26,7 @@ pub(crate) struct Renderer {
 
 impl Renderer {
     pub(crate) fn new(
-        config: Arc<Config>,
-        posts: ConcurrentPostsStore,
+        context: Arc<Context>,
         code_renderer: CodeBlockRenderer,
         posts_dir_path: PathBuf,
     ) -> (Self, mpsc::Sender<DebouncedEvent>)
@@ -42,8 +39,7 @@ impl Renderer {
         tx.send(DebouncedEvent::Rescan).unwrap();
 
         (Self {
-            config,
-            posts,
+            context,
             code_renderer,
             posts_dir_path,
             rx,
@@ -106,7 +102,7 @@ impl Renderer {
     fn update(&self, target: &EventTarget) {
         match self.parse_post_from_target(target) {
             Ok(post) => {
-                let mut guard = self.posts.write_blocking();
+                let mut guard = self.context.posts().write_blocking();
                 guard.insert(post);
             },
             Err(err) => {
@@ -118,7 +114,7 @@ impl Renderer {
     #[tracing::instrument(skip(self))]
     fn rename(&self, old_target: &EventTarget, new_target: &EventTarget) {
         let post_res = self.parse_post_from_target(new_target);
-        let mut guard = self.posts.write_blocking();
+        let mut guard = self.context.posts().write_blocking();
         guard.remove(&old_target.id);
         match post_res {
             Ok(post) => {
@@ -132,7 +128,7 @@ impl Renderer {
 
     #[tracing::instrument(skip(self))]
     fn remove(&self, target: &EventTarget) {
-        let mut guard = self.posts.write_blocking();
+        let mut guard = self.context.posts().write_blocking();
         guard.remove(&target.id);
     }
 
@@ -168,7 +164,7 @@ impl Renderer {
             }
         }
         
-        let mut guard = self.posts.write_blocking();
+        let mut guard = self.context.posts().write_blocking();
         guard.clear();
         for post in posts {
             guard.insert(post);
@@ -204,7 +200,7 @@ impl Renderer {
     
         Post::new_from_str(
             &self.code_renderer,
-            self.config.namespace_uuid,
+            self.context.config().namespace_uuid,
             target.id.clone(),
             updated,
             &contents

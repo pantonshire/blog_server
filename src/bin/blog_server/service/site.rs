@@ -11,9 +11,7 @@ use tower::limit::ConcurrencyLimitLayer;
 use tower_http::trace::TraceLayer;
 use tracing::info;
 
-use blog::db::ConcurrentPostsStore;
-
-use crate::Config;
+use crate::Context;
 
 use super::{
     atom,
@@ -26,11 +24,7 @@ use super::{
     static_content,
 };
 
-pub(crate) fn service(
-    config: Arc<Config>,
-    posts_store: ConcurrentPostsStore,
-) -> Router
-{
+pub(crate) fn service(context: Arc<Context>) -> Router {
     Router::new()
         .route("/", get(index::handle))
         .route("/contact", get(contact::handle))
@@ -38,21 +32,20 @@ pub(crate) fn service(
         .route("/rss.xml", get(rss::handle))
         .route("/atom.xml", get(atom::handle))
         .route("/articles/:post_id", get(post::handle))
-        .route("/robots.txt", static_content::file_service(&config.robots_path, None))
-        .route("/favicon.ico", static_content::file_service(&config.favicon_dir.join("favicon.ico"), None))
-        .route("/favicon-16x16.png", static_content::file_service(&config.favicon_dir.join("favicon-16x16.png"), None))
-        .route("/favicon-32x32.png", static_content::file_service(&config.favicon_dir.join("favicon-32x32.png"), None))
-        .route("/apple-touch-icon.png", static_content::file_service(&config.favicon_dir.join("apple-touch-icon.png"), None))
-        .route("/android-chrome-192x192.png", static_content::file_service(&config.favicon_dir.join("android-chrome-192x192.png"), None))
-        .route("/android-chrome-512x512.png", static_content::file_service(&config.favicon_dir.join("android-chrome-512x512.png"), None))
-        .route("/site.webmanifest", static_content::file_service(&config.favicon_dir.join("site.webmanifest"), None))
-        .nest("/static", static_content::dir_service(&config.static_dir))
-        .nest("/article_media", static_content::dir_service(&config.post_media_dir))
+        .route("/robots.txt", static_content::file_service(&context.config().content.robots_path, None))
+        .route("/favicon.ico", static_content::file_service(&context.config().content.favicon_dir.join("favicon.ico"), None))
+        .route("/favicon-16x16.png", static_content::file_service(&context.config().content.favicon_dir.join("favicon-16x16.png"), None))
+        .route("/favicon-32x32.png", static_content::file_service(&context.config().content.favicon_dir.join("favicon-32x32.png"), None))
+        .route("/apple-touch-icon.png", static_content::file_service(&context.config().content.favicon_dir.join("apple-touch-icon.png"), None))
+        .route("/android-chrome-192x192.png", static_content::file_service(&context.config().content.favicon_dir.join("android-chrome-192x192.png"), None))
+        .route("/android-chrome-512x512.png", static_content::file_service(&context.config().content.favicon_dir.join("android-chrome-512x512.png"), None))
+        .route("/site.webmanifest", static_content::file_service(&context.config().content.favicon_dir.join("site.webmanifest"), None))
+        .nest("/static", static_content::dir_service(&context.config().content.static_dir))
+        .nest("/article_media", static_content::dir_service(&context.config().content.post_media_dir))
         .fallback(handle_fallback.into_service())
-        .layer(ConcurrencyLimitLayer::new(config.concurrency_limit))
+        .layer(ConcurrencyLimitLayer::new(context.config().concurrency_limit))
         .layer(TraceLayer::new_for_http())
-        .layer(Extension(config))
-        .layer(Extension(posts_store))
+        .layer(Extension(context))
 }
 
 async fn handle_fallback(uri: Uri) -> Error {

@@ -1,19 +1,21 @@
-bind = "127.0.0.1:8080"
-concurrency_limit = 128
+bind                  = "127.0.0.1:8080"
+concurrency_limit     = 128
+fs_event_delay_millis = 2000
+namespace_uuid        = "00000000-0000-0000-0000-000000000000"
 
+[site]
+protocol = "http"
+domain   = "localhost:8080"
+
+[content]
 static_dir     = "./content/static/"
 favicon_dir    = "./content/favicon/"
 robots_path    = "./content/robots.txt"
 posts_dir      = "./articles/src/"
 post_media_dir = "./articles/media/"
 
-fs_event_delay_millis = 2000
-
-namespace_uuid = "00000000-0000-0000-0000-000000000000"
-
-[self_ref]
-protocol = "http"
-domain   = "localhost:8080"
+[github]
+source_url = "https://github.com/pantonshire/blog_content/blob/main/src"
 
 [rss]
 num_posts = 20
@@ -23,3 +25,8 @@ ttl       = 360
 [atom]
 num_posts = 20
 title     = "Pantonshire"
+
+[[contact]]
+name = "Twitter"
+user = "@pantonshire"
+url  = "https://twitter.com/pantonshire"
