@@ -15,6 +15,7 @@ pub(crate) struct Config {
     pub site: SiteConfig,
     pub rss: RssConfig,
     pub atom: AtomConfig,
+    pub contact: Vec<ContactConfig>,
 }
 
 #[derive(Deserialize, Clone, Debug)]
@@ -48,6 +49,13 @@ pub(crate) struct RssConfig {
 pub(crate) struct AtomConfig {
     pub num_posts: usize,
     pub title: String,
+}
+
+#[derive(Deserialize, Clone, Debug)]
+pub(crate) struct ContactConfig {
+    pub name: String,
+    pub user: String,
+    pub url: Option<String>,
 }
 
 impl str::FromStr for Config {

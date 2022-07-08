@@ -1,10 +1,13 @@
+use std::sync::Arc;
+
+use axum::Extension;
 use maud::html;
 
-use crate::template;
+use crate::{template, Context};
 
 use super::response::Html;
 
-pub(super) async fn handle() -> Html {
+pub(super) async fn handle(Extension(context): Extension<Arc<Context>>) -> Html {
     Html::new()
         .with_title_static("Contact")
         .with_crawler_permissive()
@@ -18,16 +21,15 @@ pub(super) async fn handle() -> Html {
                     "If you want to contact me, you can find me at:"
                 }
                 ul {
-                    li {
-                        "Twitter: "
-                        a href="https://twitter.com/pantonshire" { "@pantonshire" }
-                    }
-                    li {
-                        "Mastodon: "
-                        a href="https://tech.lgbt/web/@pantonshire#" { "@pantonshire@tech.lgbt" }
-                    }
-                    li {
-                        "Discord: pantonshire#2076"
+                    @for contact in &context.config().contact {
+                        li {
+                            (contact.name) ": "
+                            @if let Some(url) = contact.url.as_deref() {
+                                a href=(url) { (contact.user) }
+                            } @else {
+                                (contact.user)
+                            }
+                        }
                     }
                 }
             }
