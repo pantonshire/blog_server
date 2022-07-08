@@ -19,6 +19,9 @@ path = "src/bin/css_gen/main.rs"
 name = "prepublish"
 path = "src/bin/prepublish/main.rs"
 
+[profile.release]
+lto = "fat"
+
 [dependencies]
 libshire = { git = "https://github.com/pantonshire/libshire", features = ["serde"] }
 tokio = { version = "1", features = ["full"] }
