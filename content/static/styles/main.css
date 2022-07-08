@@ -302,6 +302,16 @@ ul.articles_list {
     margin-bottom: 0.5rem;
 }
 
+.article_edit {
+    font-size: 1rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.article_edit a {
+    color: #898989;
+}
+
 .codeblock {
     margin-top: 1.5rem;
     margin-bottom: 2rem;

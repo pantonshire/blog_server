@@ -15,7 +15,7 @@ posts_dir      = "./articles/src/"
 post_media_dir = "./articles/media/"
 
 [github]
-source_url = "https://github.com/pantonshire/blog_content/blob/main/src"
+edit_url = "https://github.com/pantonshire/blog_content/edit/main/src"
 
 [rss]
 num_posts = 20

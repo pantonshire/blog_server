@@ -35,7 +35,7 @@ pub(crate) struct ContentConfig {
 
 #[derive(Deserialize, Clone, Debug)]
 pub(crate) struct GithubConfig {
-    pub source_url: Option<String>,
+    pub edit_url: Option<String>,
 }
 
 #[derive(Deserialize, Clone, Debug)]

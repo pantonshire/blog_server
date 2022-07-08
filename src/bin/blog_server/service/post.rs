@@ -32,6 +32,13 @@ pub(super) async fn handle(
                     p .article_subtitle { (subtitle) }
                 }
                 p .article_published_date { "Published " (post.published().format("%Y/%m/%d")) }
+                @if let Some(source_url) = context.config().github.edit_url.as_deref() {
+                    p .article_edit {
+                        a href={(source_url) "/" (post.id()) ".toml.md"} {
+                            "Propose a change on GitHub"
+                        }
+                    }
+                }
             }
             article .article_content {
                 (post.html())
